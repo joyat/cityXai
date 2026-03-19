@@ -1,0 +1,230 @@
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    command: >
+      /bin/sh -c "apk add --no-cache openssl curl &&
+      mkdir -p /etc/nginx/certs &&
+      [ -f /etc/nginx/certs/server.crt ] || openssl req -x509 -nodes -days 365 -newkey rsa:2048
+      -keyout /etc/nginx/certs/server.key -out /etc/nginx/certs/server.crt
+      -subj '/CN=localhost' &&
+      nginx -g 'daemon off;'"
+    depends_on:
+      frontend:
+        condition: service_healthy
+      chat-api:
+        condition: service_healthy
+      ingest-api:
+        condition: service_healthy
+      admin-api:
+        condition: service_healthy
+      grafana:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./frontend/citizen-widget:/usr/share/nginx/widget:ro
+      - ./frontend/demo-municipal-site:/usr/share/nginx/demo:ro
+    networks: [paderobot_net]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1/healthz || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/admin-portal/Dockerfile
+    environment:
+      NEXT_PUBLIC_NAMESPACE: ${MUNICIPALITY_NAMESPACE:-paderborn}
+      HOSTNAME: 0.0.0.0
+      PORT: 3000
+    networks: [paderobot_net]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:3000/login || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  chat-api:
+    build:
+      context: .
+      dockerfile: backend/chat-api/Dockerfile
+    environment: &common-env
+      MUNICIPALITY_NAME: ${MUNICIPALITY_NAME:-Stadt Paderborn}
+      MUNICIPALITY_NAMESPACE: ${MUNICIPALITY_NAMESPACE:-paderborn}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@demo.de}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Demo1234!}
+      JWT_SECRET: ${JWT_SECRET:-change-me}
+      DB_ENCRYPT_KEY: ${DB_ENCRYPT_KEY:-change-me-too}
+      OLLAMA_PRIMARY_MODEL: ${OLLAMA_PRIMARY_MODEL:-qwen3:8b-q4_K_M}
+      OLLAMA_FALLBACK_MODEL: ${OLLAMA_FALLBACK_MODEL:-mistral:7b-q4_K_M}
+      EMBED_MODEL: ${EMBED_MODEL:-nomic-embed-text:v1.5}
+      CHUNK_SIZE: ${CHUNK_SIZE:-512}
+      CHUNK_OVERLAP: ${CHUNK_OVERLAP:-50}
+      RETRIEVAL_K: ${RETRIEVAL_K:-10}
+      RERANK_TOP_N: ${RERANK_TOP_N:-5}
+      CONFIDENCE_THRESHOLD: ${CONFIDENCE_THRESHOLD:-0.5}
+      OLLAMA_URL: http://ollama:11434
+      CHROMADB_HOST: chromadb
+      CHROMADB_PORT: 8000
+      KEYCLOAK_JWKS_URL: http://keycloak:8080/realms/paderobot/protocol/openid-connect/certs
+      KEYCLOAK_ISSUER: http://localhost/keycloak/realms/paderobot
+      KEYCLOAK_CLIENT_ID: paderobot-frontend
+    depends_on:
+      ollama:
+        condition: service_healthy
+      chromadb:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    volumes:
+      - ./data:/data
+    networks: [paderobot_net]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8001/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  ingest-api:
+    build:
+      context: .
+      dockerfile: backend/ingest-api/Dockerfile
+    environment:
+      <<: *common-env
+      INCOMING_DIR: /data/incoming
+    depends_on:
+      ollama:
+        condition: service_healthy
+      chromadb:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    volumes:
+      - ./data:/data
+    networks: [paderobot_net]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8002/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  admin-api:
+    build:
+      context: .
+      dockerfile: backend/admin-api/Dockerfile
+    environment:
+      <<: *common-env
+      KEYCLOAK_ADMIN_USER: admin
+      KEYCLOAK_ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Demo1234!}
+    depends_on:
+      chromadb:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    volumes:
+      - ./data:/data
+    networks: [paderobot_net]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8003/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  ollama:
+    build:
+      context: .
+      dockerfile: backend/ollama-lite/Dockerfile
+    environment:
+      OLLAMA_PRIMARY_MODEL: ${OLLAMA_PRIMARY_MODEL:-qwen3:8b-q4_K_M}
+      OLLAMA_FALLBACK_MODEL: ${OLLAMA_FALLBACK_MODEL:-mistral:7b-q4_K_M}
+      EMBED_MODEL: ${EMBED_MODEL:-nomic-embed-text:v1.5}
+    ports:
+      - "127.0.0.1:11434:11434"
+    networks: [paderobot_net]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:11434/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+
+  chromadb:
+    image: chromadb/chroma:0.5.11
+    environment:
+      IS_PERSISTENT: "TRUE"
+      ANONYMIZED_TELEMETRY: "FALSE"
+    volumes:
+      - chromadb_data:/chroma/chroma
+    networks: [paderobot_net]
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/heartbeat')\" >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    command: ["start-dev", "--import-realm", "--http-enabled=true", "--hostname-strict=false", "--proxy-headers=xforwarded"]
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Demo1234!}
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+    volumes:
+      - ./infrastructure/keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+      - keycloak_data:/opt/keycloak/data
+    networks: [paderobot_net]
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /opt/keycloak/data/import/realm-export.json"]
+      interval: 30s
+      timeout: 5s
+      retries: 15
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"
+    volumes:
+      - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks: [paderobot_net]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9090/-/healthy >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  grafana:
+    image: grafana/grafana:11.2.2
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Demo1234!}
+      GF_SERVER_ROOT_URL: http://localhost/grafana
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+    volumes:
+      - ./infrastructure/grafana/datasources/prometheus.yml:/etc/grafana/provisioning/datasources/prometheus.yml:ro
+      - ./infrastructure/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./infrastructure/grafana/dashboards/paderobot.json:/var/lib/grafana/dashboards/paderobot.json:ro
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    networks: [paderobot_net]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+
+networks:
+  paderobot_net:
+    driver: bridge
+
+volumes:
+  chromadb_data:
+  keycloak_data:

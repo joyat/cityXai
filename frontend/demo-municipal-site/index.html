@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Stadt Paderborn</title>
+    <style>
+      body { margin: 0; font-family: "IBM Plex Sans", sans-serif; background: #f4efe6; color: #173047; }
+      header { padding: 48px 24px; background: linear-gradient(135deg, #16324f, #3e6c86); color: white; }
+      main { max-width: 980px; margin: 0 auto; padding: 24px; }
+      .hero { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+      .card { background: white; border-radius: 18px; padding: 20px; box-shadow: 0 12px 30px rgba(0,0,0,0.08); }
+      @media (max-width: 800px) { .hero { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Stadt Paderborn</h1>
+      <p>Willkommen auf dem digitalen Bürgerserviceportal.</p>
+    </header>
+    <main>
+      <section class="hero">
+        <div class="card">
+          <h2>Aktuelle Themen</h2>
+          <p>Abfallkalender, Satzungen, Bauleitplanung und Dienstleistungen online verfügbar.</p>
+        </div>
+        <div class="card">
+          <h2>Ihr KI-Bürgerservice</h2>
+          <p>Der Chat unten rechts beantwortet Fragen datenschutzkonform aus lokalen Dokumenten.</p>
+        </div>
+      </section>
+    </main>
+    <script>
+      window.PadeRoBotConfig = { apiBaseUrl: "https://localhost" };
+    </script>
+    <script src="https://localhost/widget.js"></script>
+  </body>
+  </html>

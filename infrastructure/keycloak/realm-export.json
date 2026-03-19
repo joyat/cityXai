@@ -1,0 +1,96 @@
+{
+  "realm": "paderobot",
+  "enabled": true,
+  "displayName": "PadeRoBot",
+  "registrationAllowed": false,
+  "resetPasswordAllowed": true,
+  "clients": [
+    {
+      "clientId": "paderobot-frontend",
+      "name": "PadeRoBot Frontend",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "redirectUris": [
+        "http://localhost/*",
+        "https://localhost/*",
+        "http://localhost/login",
+        "https://localhost/login"
+      ],
+      "webOrigins": ["+"],
+      "protocolMappers": [
+        {
+          "name": "municipality",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "municipality",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "municipality",
+            "jsonType.label": "String"
+          }
+        }
+      ]
+    }
+  ],
+  "roles": {
+    "realm": [
+      {"name": "citizen"},
+      {"name": "staff"},
+      {"name": "document_admin"},
+      {"name": "system_admin"},
+      {"name": "readonly_auditor"}
+    ]
+  },
+  "users": [
+    {
+      "username": "admin@demo.de",
+      "email": "admin@demo.de",
+      "emailVerified": true,
+      "enabled": true,
+      "attributes": {"municipality": ["paderborn"]},
+      "credentials": [{"type": "password", "value": "Demo1234!", "temporary": false}],
+      "realmRoles": ["system_admin"]
+    },
+    {
+      "username": "staff@demo.de",
+      "email": "staff@demo.de",
+      "emailVerified": true,
+      "enabled": true,
+      "attributes": {"municipality": ["paderborn"]},
+      "credentials": [{"type": "password", "value": "Demo1234!", "temporary": false}],
+      "realmRoles": ["staff"]
+    },
+    {
+      "username": "docadmin@demo.de",
+      "email": "docadmin@demo.de",
+      "emailVerified": true,
+      "enabled": true,
+      "attributes": {"municipality": ["paderborn"]},
+      "credentials": [{"type": "password", "value": "Demo1234!", "temporary": false}],
+      "realmRoles": ["document_admin"]
+    },
+    {
+      "username": "auditor@demo.de",
+      "email": "auditor@demo.de",
+      "emailVerified": true,
+      "enabled": true,
+      "attributes": {"municipality": ["paderborn"]},
+      "credentials": [{"type": "password", "value": "Demo1234!", "temporary": false}],
+      "realmRoles": ["readonly_auditor"]
+    },
+    {
+      "username": "citizen@demo.de",
+      "email": "citizen@demo.de",
+      "emailVerified": true,
+      "enabled": true,
+      "attributes": {"municipality": ["paderborn"]},
+      "credentials": [{"type": "password", "value": "Demo1234!", "temporary": false}],
+      "realmRoles": ["citizen"]
+    }
+  ]
+}
