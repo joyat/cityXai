@@ -14,7 +14,7 @@ from starlette.responses import Response
 
 REQUEST_COUNT = Counter("ollama_requests_total", "Total ollama-lite requests", ["path", "status"])
 REQUEST_LATENCY = Histogram("ollama_request_latency_seconds", "Ollama-lite latency", ["path"])
-TOKENS_PER_SEC = Gauge("paderobot_ollama_tokens_per_sec", "Synthetic Ollama throughput")
+TOKENS_PER_SEC = Gauge("cityxai_ollama_tokens_per_sec", "Synthetic Ollama throughput")
 
 
 class MetricsMiddleware(BaseHTTPMiddleware):

@@ -2,7 +2,7 @@
 
 export function getToken() {
   if (typeof document === "undefined") return "";
-  const match = document.cookie.match(/(?:^|; )paderobot_token=([^;]+)/);
+  const match = document.cookie.match(/(?:^|; )cityxai_token=([^;]+)/);
   return match ? decodeURIComponent(match[1]) : "";
 }
 

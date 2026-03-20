@@ -40,7 +40,7 @@ class MetricsMiddleware(BaseHTTPMiddleware):
         return response
 
 
-app = FastAPI(title="PadeRoBot+ Ingest API")
+app = FastAPI(title="cityXai Ingest API")
 app.add_middleware(MetricsMiddleware)
 jobs: dict[str, IngestJob] = {}
 embedder = Embedder()

@@ -41,7 +41,7 @@ export default function ChatPage() {
         <div className="messages">
           {messages.map((message, index) => (
             <div key={index} className={`message ${message.role === "user" ? "user" : ""}`}>
-              <strong>{message.role === "user" ? "Sie" : "PadeRoBot+"}</strong>
+              <strong>{message.role === "user" ? "Sie" : "cityXai"}</strong>
               <p>{message.content}</p>
               {message.sources?.length ? (
                 <div>

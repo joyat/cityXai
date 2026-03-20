@@ -1,13 +1,13 @@
 {
-  "realm": "paderobot",
+  "realm": "cityxai",
   "enabled": true,
-  "displayName": "PadeRoBot",
+  "displayName": "cityXai",
   "registrationAllowed": false,
   "resetPasswordAllowed": true,
   "clients": [
     {
-      "clientId": "paderobot-frontend",
-      "name": "PadeRoBot Frontend",
+      "clientId": "cityxai-frontend",
+      "name": "cityXai Frontend",
       "enabled": true,
       "publicClient": true,
       "directAccessGrantsEnabled": true,

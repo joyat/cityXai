@@ -20,7 +20,7 @@ bearer = HTTPBearer(auto_error=False)
 def get_jwks() -> dict:
     realm_url = os.getenv(
         "KEYCLOAK_JWKS_URL",
-        "http://keycloak:8080/realms/paderobot/protocol/openid-connect/certs",
+        "http://keycloak:8080/realms/cityxai/protocol/openid-connect/certs",
     )
     try:
         with httpx.Client(timeout=5.0) as client:

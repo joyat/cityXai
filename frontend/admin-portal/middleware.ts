@@ -5,7 +5,7 @@ export function middleware(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/login")) {
     return NextResponse.next();
   }
-  const token = request.cookies.get("paderobot_token")?.value;
+  const token = request.cookies.get("cityxai_token")?.value;
   if (!token) {
     return NextResponse.redirect(new URL("/login", request.url));
   }

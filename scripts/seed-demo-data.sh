@@ -41,13 +41,13 @@ curl_download() {
 }
 
 make_fallback_docs() {
-  docker exec "$INGEST_CONTAINER" sh -lc "mkdir -p /tmp/paderobot-seed"
+  docker exec "$INGEST_CONTAINER" sh -lc "mkdir -p /tmp/cityxai-seed"
   docker exec -i "$INGEST_CONTAINER" python - <<'PY'
 import fitz
 from docx import Document
 from openpyxl import Workbook
 
-pdf_path = "/tmp/paderobot-seed/bebauungsplan.pdf"
+pdf_path = "/tmp/cityxai-seed/bebauungsplan.pdf"
 doc = fitz.open()
 page = doc.new_page()
 page.insert_text((72, 72), "# Bebauungsplan Musterquartier\n\nNutzung: Das Gebiet ist als allgemeines Wohngebiet festgesetzt.\n\nErschließung: Die Zufahrt erfolgt über die Musterstraße.")
@@ -59,7 +59,7 @@ document.add_heading("Erträge", level=2)
 document.add_paragraph("Die ordentlichen Erträge betragen 120.000.000 EUR.")
 document.add_heading("Aufwendungen", level=2)
 document.add_paragraph("Die ordentlichen Aufwendungen betragen 118.500.000 EUR.")
-document.save("/tmp/paderobot-seed/haushaltssatzung.docx")
+document.save("/tmp/cityxai-seed/haushaltssatzung.docx")
 
 wb = Workbook()
 ws = wb.active
@@ -68,11 +68,11 @@ ws.append(["Datum", "Bezirk", "Fraktion"])
 ws.append(["2026-04-02", "Mitte", "Restmüll"])
 ws.append(["2026-04-09", "Mitte", "Bioabfall"])
 ws.append(["2026-04-16", "Mitte", "Papier"])
-wb.save("/tmp/paderobot-seed/abfallkalender.xlsx")
+wb.save("/tmp/cityxai-seed/abfallkalender.xlsx")
 PY
-  docker cp "$INGEST_CONTAINER:/tmp/paderobot-seed/bebauungsplan.pdf" "$TMP_DIR/bebauungsplan.pdf"
-  docker cp "$INGEST_CONTAINER:/tmp/paderobot-seed/haushaltssatzung.docx" "$TMP_DIR/haushaltssatzung.docx"
-  docker cp "$INGEST_CONTAINER:/tmp/paderobot-seed/abfallkalender.xlsx" "$TMP_DIR/abfallkalender.xlsx"
+  docker cp "$INGEST_CONTAINER:/tmp/cityxai-seed/bebauungsplan.pdf" "$TMP_DIR/bebauungsplan.pdf"
+  docker cp "$INGEST_CONTAINER:/tmp/cityxai-seed/haushaltssatzung.docx" "$TMP_DIR/haushaltssatzung.docx"
+  docker cp "$INGEST_CONTAINER:/tmp/cityxai-seed/abfallkalender.xlsx" "$TMP_DIR/abfallkalender.xlsx"
 }
 
 if ! curl_download "https://www.stadt-paderborn.de" "$TMP_DIR/source.html"; then
@@ -85,9 +85,9 @@ wait_for_container_health microservices-demo-chat-api-1
 
 make_fallback_docs
 
-token_response="$(curl -kfsS -X POST "$BASE_URL/keycloak/realms/paderobot/protocol/openid-connect/token" \
+token_response="$(curl -kfsS -X POST "$BASE_URL/keycloak/realms/cityxai/protocol/openid-connect/token" \
   -H 'Content-Type: application/x-www-form-urlencoded' \
-  -d 'client_id=paderobot-frontend' \
+  -d 'client_id=cityxai-frontend' \
   -d 'grant_type=password' \
   -d 'username=docadmin@demo.de' \
   -d 'password=Demo1234!' 2>/dev/null || true)"

@@ -1,7 +1,7 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "PadeRoBot+",
+  title: "cityXai",
   description: "Souveräne kommunale KI"
 };
 

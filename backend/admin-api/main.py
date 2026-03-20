@@ -36,7 +36,7 @@ class MetricsMiddleware(BaseHTTPMiddleware):
         return response
 
 
-app = FastAPI(title="PadeRoBot+ Admin API")
+app = FastAPI(title="cityXai Admin API")
 app.add_middleware(MetricsMiddleware)
 chroma = chromadb.HttpClient(host=os.getenv("CHROMADB_HOST", "chromadb"), port=int(os.getenv("CHROMADB_PORT", "8000")))
 
@@ -142,7 +142,7 @@ async def list_users(claim: UserClaim = Depends(require_roles(["system_admin", "
     token = await _admin_token()
     async with httpx.AsyncClient(timeout=20.0) as client:
         response = await client.get(
-            "http://keycloak:8080/admin/realms/paderobot/users",
+            "http://keycloak:8080/admin/realms/cityxai/users",
             headers={"Authorization": f"Bearer {token}"},
         )
         response.raise_for_status()
@@ -151,7 +151,7 @@ async def list_users(claim: UserClaim = Depends(require_roles(["system_admin", "
     async with httpx.AsyncClient(timeout=20.0) as client:
         for user in users:
             role_response = await client.get(
-                f"http://keycloak:8080/admin/realms/paderobot/users/{user['id']}/role-mappings/realm",
+                f"http://keycloak:8080/admin/realms/cityxai/users/{user['id']}/role-mappings/realm",
                 headers={"Authorization": f"Bearer {token}"},
             )
             role_response.raise_for_status()
@@ -174,7 +174,7 @@ async def create_user(payload: dict, claim: UserClaim = Depends(require_roles(["
     token = await _admin_token()
     async with httpx.AsyncClient(timeout=20.0) as client:
         response = await client.post(
-            "http://keycloak:8080/admin/realms/paderobot/users",
+            "http://keycloak:8080/admin/realms/cityxai/users",
             headers={"Authorization": f"Bearer {token}"},
             json={
                 "username": payload["email"],
@@ -187,19 +187,19 @@ async def create_user(payload: dict, claim: UserClaim = Depends(require_roles(["
         if response.status_code not in {201, 204}:
             raise HTTPException(status_code=response.status_code, detail=response.text)
         search = await client.get(
-            f"http://keycloak:8080/admin/realms/paderobot/users?username={payload['email']}",
+            f"http://keycloak:8080/admin/realms/cityxai/users?username={payload['email']}",
             headers={"Authorization": f"Bearer {token}"},
         )
         search.raise_for_status()
         user = search.json()[0]
         role_name = payload.get("role", "staff")
         role_response = await client.get(
-            f"http://keycloak:8080/admin/realms/paderobot/roles/{role_name}",
+            f"http://keycloak:8080/admin/realms/cityxai/roles/{role_name}",
             headers={"Authorization": f"Bearer {token}"},
         )
         role_response.raise_for_status()
         await client.post(
-            f"http://keycloak:8080/admin/realms/paderobot/users/{user['id']}/role-mappings/realm",
+            f"http://keycloak:8080/admin/realms/cityxai/users/{user['id']}/role-mappings/realm",
             headers={"Authorization": f"Bearer {token}"},
             json=[role_response.json()],
         )
@@ -212,7 +212,7 @@ async def delete_user(user_id: str, claim: UserClaim = Depends(require_roles(["s
     token = await _admin_token()
     async with httpx.AsyncClient(timeout=20.0) as client:
         response = await client.delete(
-            f"http://keycloak:8080/admin/realms/paderobot/users/{user_id}",
+            f"http://keycloak:8080/admin/realms/cityxai/users/{user_id}",
             headers={"Authorization": f"Bearer {token}"},
         )
     if response.status_code not in {200, 204}:

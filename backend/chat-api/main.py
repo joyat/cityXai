@@ -21,9 +21,9 @@ from retrieval import HybridRetriever
 
 REQUEST_COUNT = Counter("chat_api_requests_total", "Total chat requests", ["method", "path", "status"])
 REQUEST_LATENCY = Histogram("chat_api_request_latency_seconds", "Chat api latency", ["path"])
-AVG_RETRIEVAL_SCORE = Gauge("paderobot_avg_retrieval_score", "Average retrieval score")
-OLLAMA_TOKENS_PER_SEC = Gauge("paderobot_ollama_tokens_per_sec", "Synthetic Ollama throughput")
-QUERY_VOLUME = Counter("paderobot_queries_total", "Total queries", ["namespace"])
+AVG_RETRIEVAL_SCORE = Gauge("cityxai_avg_retrieval_score", "Average retrieval score")
+OLLAMA_TOKENS_PER_SEC = Gauge("cityxai_ollama_tokens_per_sec", "Synthetic Ollama throughput")
+QUERY_VOLUME = Counter("cityxai_queries_total", "Total queries", ["namespace"])
 
 
 class MetricsMiddleware(BaseHTTPMiddleware):
@@ -36,7 +36,7 @@ class MetricsMiddleware(BaseHTTPMiddleware):
         return response
 
 
-app = FastAPI(title="PadeRoBot+ Chat API")
+app = FastAPI(title="cityXai Chat API")
 app.add_middleware(MetricsMiddleware)
 retriever = HybridRetriever()
 reranker = CrossEncoderReranker()

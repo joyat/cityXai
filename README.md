@@ -1,6 +1,6 @@
-# PadeRoBot+
+# cityXai
 
-PadeRoBot+ is a locally hosted, GDPR-oriented municipal AI demo for German municipalities. The stack includes ingestion, hybrid RAG, role-based access control with Keycloak, a Next.js 14 admin portal, a citizen chat widget, audit logging, and observability with Prometheus and Grafana.
+cityXai is a locally hosted, GDPR-oriented municipal AI demo for German municipalities. The stack includes ingestion, hybrid RAG, role-based access control with Keycloak, a Next.js 14 admin portal, a citizen chat widget, audit logging, and observability with Prometheus and Grafana.
 
 ## Quick start
 

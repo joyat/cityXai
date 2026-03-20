@@ -16,7 +16,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="layout">
       <aside className="sidebar">
-        <h2>PadeRoBot+</h2>
+        <h2>cityXai</h2>
         <p>Kommunaler Copilot</p>
         {items.map(([href, label]) => (
           <Link key={href} href={href} className={pathname.startsWith(href) ? "active" : ""}>

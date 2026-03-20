@@ -8,7 +8,7 @@
       "type": "timeseries",
       "title": "Query volume (queries/hour)",
       "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
-      "targets": [{"expr": "sum(increase(paderobot_queries_total[1h]))", "refId": "A"}]
+      "targets": [{"expr": "sum(increase(cityxai_queries_total[1h]))", "refId": "A"}]
     },
     {
       "type": "timeseries",
@@ -24,13 +24,13 @@
       "type": "gauge",
       "title": "Ollama tokens/sec",
       "gridPos": {"h": 8, "w": 6, "x": 0, "y": 8},
-      "targets": [{"expr": "paderobot_ollama_tokens_per_sec", "refId": "A"}]
+      "targets": [{"expr": "cityxai_ollama_tokens_per_sec", "refId": "A"}]
     },
     {
       "type": "gauge",
       "title": "Average retrieval score",
       "gridPos": {"h": 8, "w": 6, "x": 6, "y": 8},
-      "targets": [{"expr": "paderobot_avg_retrieval_score", "refId": "A"}],
+      "targets": [{"expr": "cityxai_avg_retrieval_score", "refId": "A"}],
       "fieldConfig": {
         "defaults": {
           "thresholds": {
@@ -62,6 +62,6 @@
   "style": "dark",
   "templating": {"list": []},
   "time": {"from": "now-48h", "to": "now"},
-  "title": "PadeRoBot+ Municipal AI",
+  "title": "cityXai Municipal AI",
   "version": 1
 }
