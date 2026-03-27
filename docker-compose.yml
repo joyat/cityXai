@@ -1,6 +1,6 @@
 services:
   nginx:
-    image: nginx:1.27-alpine
+    image: nginx:1.27.5-alpine
     command: >
       /bin/sh -c "apk add --no-cache openssl curl &&
       mkdir -p /etc/nginx/certs &&
@@ -180,10 +180,11 @@ services:
       - keycloak_data:/opt/keycloak/data
     networks: [cityxai_net]
     healthcheck:
-      test: ["CMD-SHELL", "test -f /opt/keycloak/data/import/realm-export.json"]
-      interval: 30s
-      timeout: 5s
-      retries: 15
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000 && echo -e 'GET /health/ready HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && grep -q '\"status\": \"UP\"' <&3 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      start_period: 60s
+      retries: 20
 
   prometheus:
     image: prom/prometheus:v2.54.1
