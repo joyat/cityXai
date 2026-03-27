@@ -4,9 +4,10 @@ services:
     command: >
       /bin/sh -c "apk add --no-cache openssl curl &&
       mkdir -p /etc/nginx/certs &&
-      [ -f /etc/nginx/certs/server.crt ] || openssl req -x509 -nodes -days 365 -newkey rsa:2048
+      [ -f /etc/nginx/certs/server.crt ] || openssl req -x509 -nodes -days 730 -newkey rsa:2048
       -keyout /etc/nginx/certs/server.key -out /etc/nginx/certs/server.crt
-      -subj '/CN=localhost' &&
+      -subj '/CN=cityxai.local'
+      -addext 'subjectAltName=DNS:cityxai.local,DNS:localhost,IP:127.0.0.1' &&
       nginx -g 'daemon off;'"
     depends_on:
       frontend:
