@@ -78,11 +78,11 @@ export default function LoginPage() {
         <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
           <div>
             <label>E-Mail-Adresse</label>
-            <input name="email" type="email" defaultValue="docadmin@demo.de" autoComplete="email" />
+            <input name="email" type="email" placeholder="name@gemeinde.de" autoComplete="email" />
           </div>
           <div>
             <label>Passwort</label>
-            <input name="password" type="password" defaultValue="Demo1234!" autoComplete="current-password" />
+            <input name="password" type="password" placeholder="••••••••" autoComplete="current-password" />
           </div>
         </div>
 

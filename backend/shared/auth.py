@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from functools import lru_cache
+import time
 from typing import Iterable
 
 import httpx
@@ -15,23 +15,45 @@ from backend.shared.models import UserClaim
 
 bearer = HTTPBearer(auto_error=False)
 
+# JWKS cache with TTL — refreshed every 10 minutes so key rotations take effect
+_jwks_cache: dict = {"keys": []}
+_jwks_fetched_at: float = 0.0
+_JWKS_TTL = 600  # seconds
 
-@lru_cache
+
 def get_jwks() -> dict:
+    global _jwks_cache, _jwks_fetched_at
+    now = time.monotonic()
+    if now - _jwks_fetched_at < _JWKS_TTL and _jwks_cache.get("keys"):
+        return _jwks_cache
     realm_url = os.getenv(
         "KEYCLOAK_JWKS_URL",
         "http://keycloak:8080/realms/cityxai/protocol/openid-connect/certs",
     )
     try:
         with httpx.Client(timeout=5.0) as client:
-            return client.get(realm_url).json()
+            fresh = client.get(realm_url).json()
+            if fresh.get("keys"):  # only update cache on successful response
+                _jwks_cache = fresh
+                _jwks_fetched_at = now
     except Exception:
-        return {"keys": []}
+        pass  # return stale cache rather than empty keys
+    return _jwks_cache
+
+
+def _find_key(kid: str | None) -> dict | None:
+    keys = get_jwks().get("keys", [])
+    if kid:
+        return next((k for k in keys if k.get("kid") == kid), None)
+    # No kid hint — try first available key
+    return keys[0] if keys else None
 
 
 def decode_token(token: str) -> UserClaim:
     header = jwt.get_unverified_header(token)
-    if header.get("alg") == "HS256":
+    alg = header.get("alg", "RS256")
+
+    if alg == "HS256":
         secret = os.getenv("JWT_SECRET")
         if not secret:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="JWT_SECRET fehlt")
@@ -43,24 +65,38 @@ def decode_token(token: str) -> UserClaim:
                 options={"verify_at_hash": False, "verify_aud": False, "verify_iss": False},
             )
         except ExpiredSignatureError as exc:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token abgelaufen") from exc
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token abgelaufen",
+                headers={"WWW-Authenticate": "Bearer"},
+            ) from exc
         except JOSEError as exc:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Ungültiges Token") from exc
     else:
-        key = next((item for item in get_jwks().get("keys", []) if item.get("kid") == header.get("kid")), None)
+        key = _find_key(header.get("kid"))
+        if not key:
+            # Attempt a forced cache refresh before giving up
+            global _jwks_fetched_at
+            _jwks_fetched_at = 0.0
+            key = _find_key(header.get("kid"))
         if not key:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unbekannter Signaturschlüssel")
         try:
             payload = jwt.decode(
                 token,
                 key,
-                algorithms=[header.get("alg", "RS256")],
+                algorithms=[alg],
                 options={"verify_at_hash": False, "verify_aud": False, "verify_iss": False},
             )
         except ExpiredSignatureError as exc:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token abgelaufen") from exc
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token abgelaufen",
+                headers={"WWW-Authenticate": "Bearer"},
+            ) from exc
         except JOSEError as exc:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Ungültiges Token") from exc
+
     roles = payload.get("realm_access", {}).get("roles", [])
     municipality = payload.get("municipality", os.getenv("MUNICIPALITY_NAMESPACE", "paderborn"))
     return UserClaim(
@@ -80,7 +116,11 @@ def require_roles(allowed: Iterable[str]):
         x_namespace: str | None = Header(default=None),
     ) -> UserClaim:
         if credentials is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentifizierung erforderlich")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Authentifizierung erforderlich",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
         claim = decode_token(credentials.credentials)
         if not allowed_set.intersection(claim.roles):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Unzureichende Berechtigung")

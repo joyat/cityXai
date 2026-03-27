@@ -47,9 +47,21 @@ export default function UsersPage() {
           <h1>Benutzerverwaltung</h1>
           <p>Rollenbasierter Zugriff für Verwaltung, Bürger und Revision.</p>
         </div>
-        <button className="secondary" onClick={() => setMessage("LDAP-Synchronisierung gestartet (Demo)")} style={{ padding:"9px 16px" }}>
-          LDAP Sync
-        </button>
+        <div style={{ position:"relative", display:"inline-block" }}>
+          <button
+            className="secondary"
+            style={{ padding:"9px 16px", opacity:0.5, cursor:"not-allowed" }}
+            title="LDAP-Synchronisierung ist in der nächsten Version verfügbar"
+            disabled
+          >
+            LDAP Sync
+            <span style={{
+              marginLeft:8, fontSize:"0.65rem", padding:"1px 6px",
+              borderRadius:"10px", background:"rgba(124,58,237,0.25)",
+              color:"#a78bfa", fontWeight:600, letterSpacing:"0.04em",
+            }}>Demnächst</span>
+          </button>
+        </div>
       </div>
 
       <div className="grid cols-2">
@@ -103,7 +115,7 @@ export default function UsersPage() {
           </div>
           <div>
             <label>Passwort</label>
-            <input name="password" type="password" defaultValue="Demo1234!" required />
+            <input name="password" type="password" placeholder="Temporäres Passwort" required />
           </div>
           <div>
             <label>Rolle</label>
@@ -111,6 +123,8 @@ export default function UsersPage() {
               <option value="staff">staff</option>
               <option value="document_admin">document_admin</option>
               <option value="readonly_auditor">readonly_auditor</option>
+              <option value="system_admin">system_admin</option>
+              <option value="citizen">citizen</option>
             </select>
           </div>
           <button type="submit" style={{ justifyContent:"center", marginTop:4 }}>Benutzer anlegen</button>

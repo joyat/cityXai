@@ -6,7 +6,7 @@ import { apiFetch } from "../../lib/api";
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<any[]>([]);
-  const [devMode, setDevMode] = useState(true);
+  const [devMode, setDevMode] = useState(false);
   const [mode, setMode] = useState("hybrid");
   const [loading, setLoading] = useState(false);
 
