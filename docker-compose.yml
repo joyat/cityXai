@@ -28,6 +28,7 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./frontend/citizen-widget:/usr/share/nginx/widget:ro
       - ./frontend/demo-municipal-site:/usr/share/nginx/demo:ro
+      - ./frontend/landing:/usr/share/nginx/landing:ro
     networks: [cityxai_net]
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://127.0.0.1/healthz || exit 1"]

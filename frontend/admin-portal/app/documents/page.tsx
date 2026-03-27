@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
 import { Shell } from "../../components/shell";
 import { apiFetch } from "../../lib/api";
 
@@ -19,16 +18,17 @@ export default function DocumentsPage() {
 
   async function upload(file?: File) {
     if (!file) return;
+    setStatus("Upload läuft…");
     const form = new FormData();
     form.append("file", file);
     form.append("classification", "public");
     form.append("department", "Bürgerservice");
-    const response = await apiFetch("/api/ingest/upload", { method: "POST", body: form });
+    const response = await apiFetch("/api/ingest/upload", { method:"POST", body:form });
     const job = await response.json();
-    setStatus(`Upload gestartet: ${job.job_id}`);
+    setStatus(`Verarbeitung gestartet…`);
     const poll = setInterval(async () => {
       const current = await apiFetch(`/api/ingest/status/${job.job_id}`).then((r) => r.json());
-      setStatus(`Status: ${current.status}`);
+      setStatus(`Status: ${current.status === "ready" ? "Bereit ✓" : current.status === "failed" ? "Fehler ✗" : "Verarbeitung…"}`);
       if (current.status !== "processing") {
         clearInterval(poll);
         setPreview(current.preview_md);
@@ -38,53 +38,82 @@ export default function DocumentsPage() {
   }
 
   async function remove(docId: string) {
-    await apiFetch(`/api/ingest/document/${docId}`, { method: "DELETE" });
+    await apiFetch(`/api/ingest/document/${docId}`, { method:"DELETE" });
     load();
   }
 
   return (
     <Shell>
       <div className="header">
-        <div><h1>Dokumentbibliothek</h1><p>Upload, Statusüberwachung und Markdown-Vorschau.</p></div>
+        <div>
+          <h1>Dokumentbibliothek</h1>
+          <p>Upload, Statusverfolgung und Markdown-Vorschau.</p>
+        </div>
       </div>
-      <div className="card" style={{ marginBottom: 16 }}>
+
+      <div className="card" style={{ marginBottom:16 }}>
         <label className="dropzone">
           <input type="file" hidden onChange={(e) => upload(e.target.files?.[0])} />
+          <div style={{ fontSize:28, marginBottom:10 }}>📄</div>
           <strong>Datei hier ablegen oder klicken</strong>
-          <p>Unterstützt PDF, DOCX, XLSX, PPTX, Bilder, CSV und HTML.</p>
+          <p>PDF, DOCX, XLSX, PPTX, Bilder, CSV, HTML</p>
         </label>
-        <p>{status}</p>
+        {status && <p style={{ textAlign:"center", marginTop:12, fontSize:"0.84rem", color:"var(--cyan)" }}>{status}</p>}
       </div>
+
       <div className="card">
-        <table>
-          <thead>
-            <tr><th>Name</th><th>Typ</th><th>Status</th><th>Chunks</th><th>Upload</th><th>Aktion</th></tr>
-          </thead>
-          <tbody>
-            {documents.map((doc) => (
-              <tr key={doc.doc_id}>
-                <td>{doc.filename}</td>
-                <td>{doc.content_type}</td>
-                <td><span className="badge success">Bereit</span></td>
-                <td>{doc.chunk_count}</td>
-                <td>{doc.created_at}</td>
-                <td>
-                  <button className="secondary" onClick={() => setPreview(JSON.stringify(doc, null, 2))}>Preview MD</button>
-                  <button style={{ marginLeft: 8 }} onClick={() => remove(doc.doc_id)}>Löschen</button>
-                </td>
+        {documents.length === 0 ? (
+          <p style={{ textAlign:"center", color:"var(--text-muted)", padding:"32px 0", fontSize:"0.875rem" }}>
+            Noch keine Dokumente hochgeladen.
+          </p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Dateiname</th>
+                <th>Typ</th>
+                <th>Status</th>
+                <th>Chunks</th>
+                <th>Hochgeladen</th>
+                <th>Aktionen</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {documents.map((doc) => (
+                <tr key={doc.doc_id}>
+                  <td style={{ fontWeight:500 }}>{doc.filename}</td>
+                  <td><span className="mono">{doc.content_type || "—"}</span></td>
+                  <td><span className="badge success">Bereit</span></td>
+                  <td style={{ color:"var(--text-muted)" }}>{doc.chunk_count}</td>
+                  <td className="mono">{doc.created_at ? new Date(doc.created_at).toLocaleDateString("de-DE") : "—"}</td>
+                  <td>
+                    <div style={{ display:"flex", gap:8 }}>
+                      <button className="secondary" onClick={() => setPreview(JSON.stringify(doc, null, 2))} style={{ padding:"6px 12px", fontSize:"0.78rem" }}>
+                        Vorschau
+                      </button>
+                      <button className="danger-btn" onClick={() => remove(doc.doc_id)} style={{ padding:"6px 12px", fontSize:"0.78rem" }}>
+                        Löschen
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
-      {preview ? (
+
+      {preview && (
         <div className="modal" onClick={() => setPreview(null)}>
           <div onClick={(e) => e.stopPropagation()}>
-            <div className="header"><h3>Markdown-Vorschau</h3><button onClick={() => setPreview(null)}>Schließen</button></div>
-            <pre style={{ whiteSpace: "pre-wrap" }}>{preview}</pre>
+            <div className="header">
+              <h3 style={{ fontSize:"1rem" }}>Markdown-Vorschau</h3>
+              <button className="secondary" onClick={() => setPreview(null)} style={{ padding:"6px 14px" }}>Schließen</button>
+            </div>
+            <pre>{preview}</pre>
           </div>
         </div>
-      ) : null}
+      )}
     </Shell>
   );
 }

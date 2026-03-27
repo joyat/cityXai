@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cityXai — Souveräne KI für deutsche Kommunen</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    /* ── Tokens ── */
+    :root {
+      --cyan:    #00d4ff;
+      --violet:  #7c3aed;
+      --bg:      #0a0e27;
+      --bg-card: rgba(255,255,255,0.05);
+      --border:  rgba(255,255,255,0.09);
+      --text:    #e2e8f5;
+      --muted:   #6b7a99;
+      --faint:   #2e3a55;
+      --success: #10b981;
+      --grad:    linear-gradient(135deg,#00d4ff 0%,#7c3aed 100%);
+      --r:       16px;
+    }
+
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+
+    /* ── Animations ── */
+    @keyframes gradientShift {
+      0%,100% { background-position: 0% 50%; }
+      50%      { background-position: 100% 50%; }
+    }
+    @keyframes floatY {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-14px); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulseDot {
+      0%,100% { opacity: 0.6; }
+      50%      { opacity: 1; }
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .fade-in { animation: fadeUp 0.7s ease both; }
+    .fade-in-delay-1 { animation: fadeUp 0.7s 0.1s ease both; }
+    .fade-in-delay-2 { animation: fadeUp 0.7s 0.2s ease both; }
+    .fade-in-delay-3 { animation: fadeUp 0.7s 0.3s ease both; }
+    .fade-in-delay-4 { animation: fadeUp 0.7s 0.4s ease both; }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 40px;
+      background: rgba(10,14,39,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-brand {
+      font-size: 1.15rem;
+      font-weight: 700;
+      background: var(--grad);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradientShift 6s ease-in-out infinite;
+    }
+    .nav-links { display: flex; gap: 28px; align-items: center; }
+    .nav-links a { font-size: 0.875rem; color: var(--muted); transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
+    .btn-nav {
+      padding: 8px 18px;
+      border-radius: 10px;
+      background: var(--grad);
+      background-size: 200% 200%;
+      color: #fff;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      animation: gradientShift 6s ease-in-out infinite;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .btn-nav:hover { box-shadow: 0 0 22px rgba(0,212,255,0.4); transform: translateY(-1px); }
+
+    /* ── Section base ── */
+    section { padding: 100px 40px; max-width: 1160px; margin: 0 auto; }
+
+    /* ── Hero ── */
+    .hero-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      padding: 140px 40px 100px;
+    }
+    .hero-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+    }
+    .hero-orb-1 { width:500px; height:500px; background:rgba(0,212,255,0.09); top:-100px; left:-80px; animation: floatY 8s ease-in-out infinite; }
+    .hero-orb-2 { width:420px; height:420px; background:rgba(124,58,237,0.08); bottom:-60px; right:-60px; animation: floatY 10s 2s ease-in-out infinite; }
+    .hero-orb-3 { width:280px; height:280px; background:rgba(0,212,255,0.05); top:40%; left:50%; transform:translate(-50%,-50%); animation: floatY 12s 1s ease-in-out infinite; }
+
+    .hero-inner { position: relative; z-index: 1; max-width: 820px; }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(0,212,255,0.1);
+      border: 1px solid rgba(0,212,255,0.2);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--cyan);
+      letter-spacing: 0.04em;
+      margin-bottom: 28px;
+    }
+    .hero-badge-dot { width:6px; height:6px; border-radius:50%; background:var(--cyan); animation:pulseDot 2s ease-in-out infinite; }
+
+    .hero-title {
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.12;
+      margin-bottom: 22px;
+    }
+    .grad-text {
+      background: var(--grad);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradientShift 6s ease-in-out infinite;
+    }
+    .hero-sub {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: var(--muted);
+      max-width: 620px;
+      margin: 0 auto 38px;
+      line-height: 1.7;
+    }
+    .hero-ctas { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary {
+      padding: 14px 30px;
+      border-radius: 12px;
+      background: var(--grad);
+      background-size: 200% 200%;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      animation: gradientShift 6s ease-in-out infinite;
+      transition: box-shadow 0.2s, transform 0.2s;
+      display: inline-block;
+    }
+    .btn-primary:hover { box-shadow: 0 0 32px rgba(0,212,255,0.45); transform: translateY(-2px); }
+    .btn-secondary {
+      padding: 14px 30px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      display: inline-block;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.15); }
+
+    .hero-scroll {
+      margin-top: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      font-size: 0.8rem;
+      color: var(--faint);
+    }
+    .hero-scroll-line { width: 1px; height: 40px; background: linear-gradient(to bottom, transparent, var(--faint)); }
+
+    /* ── Section title ── */
+    .section-label {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--cyan);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      line-height: 1.2;
+      margin-bottom: 14px;
+    }
+    .section-sub {
+      font-size: 1rem;
+      color: var(--muted);
+      max-width: 560px;
+      line-height: 1.7;
+    }
+    .section-header { margin-bottom: 52px; }
+
+    /* ── Glass card ── */
+    .glass-card {
+      background: linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 100%);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 28px;
+      transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+    }
+    .glass-card:hover {
+      border-color: rgba(0,212,255,0.22);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.3), 0 0 30px rgba(0,212,255,0.06);
+      transform: translateY(-4px);
+    }
+
+    /* ── Value props grid ── */
+    .props-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+    .prop-icon {
+      width: 46px; height: 46px;
+      border-radius: 13px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      margin-bottom: 18px;
+    }
+    .prop-icon.cyan   { background: rgba(0,212,255,0.12); }
+    .prop-icon.violet { background: rgba(124,58,237,0.12); }
+    .prop-icon.green  { background: rgba(16,185,129,0.12); }
+    .prop-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
+    .prop-desc  { font-size: 0.875rem; color: var(--muted); line-height: 1.65; }
+
+    /* ── How it works ── */
+    .how-grid {
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 0;
+      position: relative;
+    }
+    .how-grid::before {
+      content: "";
+      position: absolute;
+      top: 36px; left: 12%;
+      width: 76%; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--cyan), var(--violet), transparent);
+      opacity: 0.3;
+    }
+    .how-step { text-align: center; padding: 0 16px; position: relative; }
+    .how-num {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: var(--grad);
+      background-size: 200%;
+      animation: gradientShift 6s ease-in-out infinite;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; font-weight: 800;
+      margin: 0 auto 18px;
+      box-shadow: 0 0 20px rgba(0,212,255,0.3);
+    }
+    .how-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; }
+    .how-desc  { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── Compliance section ── */
+    .compliance-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+    .compliance-list { display: flex; flex-direction: column; gap: 14px; }
+    .compliance-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 16px 18px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: border-color 0.2s;
+    }
+    .compliance-item:hover { border-color: rgba(0,212,255,0.2); }
+    .compliance-check {
+      width: 22px; height: 22px; flex-shrink: 0;
+      border-radius: 6px;
+      background: var(--success-dim, rgba(16,185,129,0.12));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; color: var(--success);
+    }
+    .compliance-item-title { font-size: 0.875rem; font-weight: 600; margin-bottom: 3px; }
+    .compliance-item-sub   { font-size: 0.78rem; color: var(--muted); }
+
+    .code-block {
+      background: rgba(0,0,0,0.35);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .code-block-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+    }
+    .code-dot { width:10px; height:10px; border-radius:50%; }
+    .code-dot-r { background:#ef4444; }
+    .code-dot-y { background:#f59e0b; }
+    .code-dot-g { background:#10b981; }
+    .code-block pre {
+      padding: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      line-height: 1.8;
+      color: var(--muted);
+      overflow-x: auto;
+    }
+    .code-block .key   { color: var(--cyan); }
+    .code-block .value { color: #a78bfa; }
+    .code-block .str   { color: var(--success); }
+    .code-block .num   { color: #f59e0b; }
+
+    /* ── Features grid ── */
+    .features-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; }
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 24px;
+      transition: border-color 0.22s, transform 0.22s;
+    }
+    .feature-card:hover { border-color: rgba(0,212,255,0.2); transform: translateY(-3px); }
+    .feature-icon { font-size: 24px; margin-bottom: 14px; }
+    .feature-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 7px; }
+    .feature-desc  { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── CTA section ── */
+    .cta-wrap {
+      text-align: center;
+      padding: 100px 40px;
+      position: relative;
+    }
+    .cta-bg {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at center, rgba(0,212,255,0.07) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .cta-inner { position: relative; z-index: 1; }
+    .cta-title { font-size: clamp(1.8rem,4vw,2.8rem); font-weight: 800; letter-spacing:-0.025em; margin-bottom:14px; }
+    .cta-sub   { font-size: 1rem; color: var(--muted); margin-bottom: 36px; }
+
+    /* ── Badges row ── */
+    .badges-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 50px; }
+    .pill-badge {
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .pill-badge.active { color: var(--cyan); background: rgba(0,212,255,0.1); border-color: rgba(0,212,255,0.25); }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 36px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a:hover { color: var(--text); }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      nav { padding: 14px 20px; }
+      .nav-links { display: none; }
+      section { padding: 70px 24px; }
+      .props-grid  { grid-template-columns: 1fr; }
+      .how-grid    { grid-template-columns: 1fr 1fr; }
+      .how-grid::before { display: none; }
+      .compliance-grid { grid-template-columns: 1fr; }
+      .features-grid   { grid-template-columns: 1fr 1fr; }
+      .hero-ctas { flex-direction: column; align-items: center; }
+      .cta-wrap { padding: 70px 24px; }
+      footer { flex-direction: column; text-align: center; }
+    }
+    @media (max-width: 600px) {
+      .features-grid { grid-template-columns: 1fr; }
+      .how-grid      { grid-template-columns: 1fr; }
+      .hero-title    { font-size: 2rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *,*::before,*::after { animation: none !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Navigation ──────────────────────────────────────────────────────── -->
+<nav>
+  <div class="nav-brand">⚡ cityXai</div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#compliance">Compliance</a>
+    <a href="#how">Funktionsweise</a>
+    <a class="btn-nav" href="https://localhost">Demo starten</a>
+  </div>
+</nav>
+
+<!-- ── Hero ────────────────────────────────────────────────────────────── -->
+<div class="hero-wrap">
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-orb hero-orb-3"></div>
+
+  <div class="hero-inner">
+    <div class="hero-badge fade-in">
+      <span class="hero-badge-dot"></span>
+      Lokal gehostet · DSGVO-konform · KI-Verordnung Art. 13
+    </div>
+
+    <h1 class="hero-title fade-in-delay-1">
+      Souveräne KI<br />
+      für <span class="grad-text">deutsche Kommunen</span>
+    </h1>
+
+    <p class="hero-sub fade-in-delay-2">
+      Sichere, quellengestützte Verwaltungsintelligenz — lokal betrieben,
+      vollständig kontrolliert. Keine Cloud-Abhängigkeit, keine Datenweitergabe.
+    </p>
+
+    <div class="hero-ctas fade-in-delay-3">
+      <a class="btn-primary" href="https://localhost">Zur Live-Demo</a>
+      <a class="btn-secondary" href="#how">Wie es funktioniert ↓</a>
+    </div>
+
+    <div class="hero-scroll fade-in-delay-4">
+      <div class="hero-scroll-line"></div>
+      Hybrid RAG · Keycloak RBAC · Prometheus Monitoring
+      <div class="hero-scroll-line"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Value Props ──────────────────────────────────────────────────────── -->
+<section>
+  <div class="section-header" style="text-align:center; margin-left:auto; margin-right:auto;">
+    <div class="section-label">Warum cityXai</div>
+    <h2 class="section-title">Gebaut für Kommunen.<br/>Nicht für die Cloud.</h2>
+    <p class="section-sub" style="margin:0 auto;">
+      Deutsche Verwaltungen brauchen KI, die ihre Datenschutzanforderungen erfüllt —
+      ohne Kompromisse bei Leistung und Benutzerfreundlichkeit.
+    </p>
+  </div>
+
+  <div class="props-grid">
+    <div class="glass-card fade-in">
+      <div class="prop-icon cyan">🏛️</div>
+      <div class="prop-title">Vollständige Datenhoheit</div>
+      <p class="prop-desc">Alle Daten, Modelle und Embeddings verbleiben in Ihrer Infrastruktur. Kein Byte verlässt Ihren Server.</p>
+    </div>
+    <div class="glass-card fade-in-delay-1">
+      <div class="prop-icon violet">⚖️</div>
+      <div class="prop-title">DSGVO &amp; KI-Verordnung</div>
+      <p class="prop-desc">Hash-basiertes Audit-Logging, rollenbasierte Zugriffskontrolle und transparente KI-Kennzeichnung nach Art. 13 AIAV.</p>
+    </div>
+    <div class="glass-card fade-in-delay-2">
+      <div class="prop-icon green">⚡</div>
+      <div class="prop-title">Lokale Inferenz</div>
+      <p class="prop-desc">Ollama betreibt Sprachmodelle lokal. Schnelle Antwortzeiten ohne externe API-Abhängigkeiten oder Drittlandtransfer.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── How it works ─────────────────────────────────────────────────────── -->
+<section id="how" style="padding-top:60px;">
+  <div class="section-header" style="text-align:center;">
+    <div class="section-label">Funktionsweise</div>
+    <h2 class="section-title">Von der Akte zur Antwort</h2>
+  </div>
+
+  <div class="how-grid">
+    <div class="how-step fade-in">
+      <div class="how-num">1</div>
+      <div class="how-title">Dokumente hochladen</div>
+      <p class="how-desc">PDF, DOCX, XLSX, PPTX — Ihre Akten werden konvertiert und kategorisiert.</p>
+    </div>
+    <div class="how-step fade-in-delay-1">
+      <div class="how-num">2</div>
+      <div class="how-title">Vektoren indexieren</div>
+      <p class="how-desc">Semantische Embeddings werden lokal mit Ollama erzeugt und in ChromaDB gespeichert.</p>
+    </div>
+    <div class="how-step fade-in-delay-2">
+      <div class="how-num">3</div>
+      <div class="how-title">Hybrid-RAG Abfrage</div>
+      <p class="how-desc">Dense + sparse Retrieval mit Reciprocal Rank Fusion liefert quellengestützte Antworten.</p>
+    </div>
+    <div class="how-step fade-in-delay-3">
+      <div class="how-num">4</div>
+      <div class="how-title">Audit &amp; Compliance</div>
+      <p class="how-desc">Jede Anfrage wird hash-basiert protokolliert — nachvollziehbar, filterbar, exportierbar.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Compliance ───────────────────────────────────────────────────────── -->
+<section id="compliance">
+  <div class="compliance-grid">
+    <div>
+      <div class="section-label">Compliance &amp; Sicherheit</div>
+      <h2 class="section-title">Gebaut für<br/><span class="grad-text">regulierte Umgebungen</span></h2>
+      <p class="section-sub" style="margin-bottom:32px;">
+        Jede Architekturentscheidung orientiert sich an DSGVO, EU-KI-Verordnung und dem Prinzip der Datensparsamkeit.
+      </p>
+
+      <div class="compliance-list">
+        <div class="compliance-item">
+          <div class="compliance-check">✓</div>
+          <div>
+            <div class="compliance-item-title">Lokale Verarbeitung</div>
+            <div class="compliance-item-sub">DSGVO Art. 5 &amp; 24 — Datensouveränität durch On-Premise-Betrieb</div>
+          </div>
+        </div>
+        <div class="compliance-item">
+          <div class="compliance-check">✓</div>
+          <div>
+            <div class="compliance-item-title">Namespace-Isolation</div>
+            <div class="compliance-item-sub">DSGVO Art. 32 — Mandantentrennung pro Kommune</div>
+          </div>
+        </div>
+        <div class="compliance-item">
+          <div class="compliance-check">✓</div>
+          <div>
+            <div class="compliance-item-title">Rollenbasierte Zugriffskontrolle</div>
+            <div class="compliance-item-sub">DSGVO Art. 25 — Privacy by Design via Keycloak RBAC</div>
+          </div>
+        </div>
+        <div class="compliance-item">
+          <div class="compliance-check">✓</div>
+          <div>
+            <div class="compliance-item-title">Hash-basiertes Audit-Log</div>
+            <div class="compliance-item-sub">KI-Verordnung Art. 12 — Nachvollziehbarkeit ohne PII-Speicherung</div>
+          </div>
+        </div>
+        <div class="compliance-item">
+          <div class="compliance-check">✓</div>
+          <div>
+            <div class="compliance-item-title">KI-Transparenz-Footer</div>
+            <div class="compliance-item-sub">KI-Verordnung Transparenzpflichten — automatisierter Hinweis bei Bürgeranfragen</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="code-block">
+        <div class="code-block-header">
+          <div class="code-dot code-dot-r"></div>
+          <div class="code-dot code-dot-y"></div>
+          <div class="code-dot code-dot-g"></div>
+          <span style="margin-left:8px; font-size:0.72rem; color:var(--muted); font-family:'JetBrains Mono',monospace;">audit-2026-03-28.log</span>
+        </div>
+        <pre>{
+  <span class="key">"timestamp"</span>:         <span class="str">"2026-03-28T14:23:11Z"</span>,
+  <span class="key">"municipality"</span>:      <span class="str">"Stadt Paderborn"</span>,
+  <span class="key">"user_role"</span>:         <span class="str">"staff"</span>,
+  <span class="key">"user_id_hash"</span>:      <span class="str">"a3f8c2d1e9b47..."</span>,
+  <span class="key">"query_hash"</span>:        <span class="str">"9d4e2a1c8f3b7..."</span>,
+  <span class="key">"retrieved_doc_ids"</span>: [<span class="str">"doc-001"</span>, <span class="str">"doc-004"</span>],
+  <span class="key">"model_used"</span>:        <span class="str">"qwen3:8b-q4_K_M"</span>,
+  <span class="key">"response_tokens"</span>:   <span class="num">142</span>,
+  <span class="key">"latency_ms"</span>:        <span class="num">387</span>,
+  <span class="key">"flagged"</span>:           <span class="value">false</span>
+}</pre>
+      </div>
+
+      <div style="margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="glass-card" style="text-align:center; padding:20px 16px;">
+          <div style="font-size:1.6rem; font-weight:800; color:var(--cyan);">100%</div>
+          <div style="font-size:0.78rem; color:var(--muted); margin-top:4px;">Lokale Verarbeitung</div>
+        </div>
+        <div class="glass-card" style="text-align:center; padding:20px 16px;">
+          <div style="font-size:1.6rem; font-weight:800; color:var(--success);">0</div>
+          <div style="font-size:0.78rem; color:var(--muted); margin-top:4px;">Externe API-Aufrufe</div>
+        </div>
+        <div class="glass-card" style="text-align:center; padding:20px 16px;">
+          <div style="font-size:1.6rem; font-weight:800; color:#a78bfa;">5</div>
+          <div style="font-size:0.78rem; color:var(--muted); margin-top:4px;">Benutzerrollen</div>
+        </div>
+        <div class="glass-card" style="text-align:center; padding:20px 16px;">
+          <div style="font-size:1.6rem; font-weight:800; color:var(--warning);">DSGVO</div>
+          <div style="font-size:0.78rem; color:var(--muted); margin-top:4px;">Art. 5, 24, 25, 32</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Features ─────────────────────────────────────────────────────────── -->
+<section id="features">
+  <div class="section-header" style="text-align:center;">
+    <div class="section-label">Features</div>
+    <h2 class="section-title">Alles was eine<br/>Kommunalverwaltung braucht</h2>
+  </div>
+
+  <div class="features-grid">
+    <div class="feature-card fade-in">
+      <div class="feature-icon">📊</div>
+      <div class="feature-title">Dashboard &amp; Monitoring</div>
+      <p class="feature-desc">Echtzeit-Metriken zu Dokumenten, Anfragen, Latenz und Speicher — visualisiert in Grafana.</p>
+    </div>
+    <div class="feature-card fade-in-delay-1">
+      <div class="feature-icon">💬</div>
+      <div class="feature-title">Hybrid RAG Chat</div>
+      <p class="feature-desc">Dense + sparse Retrieval mit Reranking und quellengestützten Antworten inkl. Konfidenz-Score.</p>
+    </div>
+    <div class="feature-card fade-in-delay-2">
+      <div class="feature-icon">📁</div>
+      <div class="feature-title">Dokumentverwaltung</div>
+      <p class="feature-desc">Upload und Verarbeitung von PDF, DOCX, XLSX, PPTX mit Live-Statusverfolgung.</p>
+    </div>
+    <div class="feature-card fade-in-delay-3">
+      <div class="feature-icon">🛡️</div>
+      <div class="feature-title">Audit &amp; Compliance</div>
+      <p class="feature-desc">Filterbare, exportierbare Protokolle mit SHA-256-Hashing — KI-Verordnung konform.</p>
+    </div>
+    <div class="feature-card fade-in-delay-4">
+      <div class="feature-icon">👥</div>
+      <div class="feature-title">Benutzerverwaltung</div>
+      <p class="feature-desc">Keycloak-gestützte RBAC mit 5 Rollen: Bürger, Sachbearbeiter, Dokumentenadmin, Admin, Revisor.</p>
+    </div>
+    <div class="feature-card fade-in">
+      <div class="feature-icon">🔌</div>
+      <div class="feature-title">Bürgerchat-Widget</div>
+      <p class="feature-desc">Einbettbarer Chat für kommunale Websites — zero externe Aufrufe, KI-Hinweis inklusive.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ──────────────────────────────────────────────────────────────── -->
+<div class="cta-wrap">
+  <div class="cta-bg"></div>
+  <div class="cta-inner">
+    <div class="badges-row">
+      <span class="pill-badge active">DSGVO-konform</span>
+      <span class="pill-badge active">KI-Verordnung Art. 12 &amp; 13</span>
+      <span class="pill-badge">On-Premise</span>
+      <span class="pill-badge">Open Source</span>
+      <span class="pill-badge">Docker</span>
+    </div>
+    <h2 class="cta-title">Bereit für souveräne<br /><span class="grad-text">Kommunen-KI?</span></h2>
+    <p class="cta-sub">Starten Sie die Demo in unter 5 Minuten auf Ihrer eigenen Infrastruktur.</p>
+    <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
+      <a class="btn-primary" href="https://localhost">Live-Demo starten</a>
+      <a class="btn-secondary" href="https://github.com/joyat/cityXai">GitHub ansehen</a>
+    </div>
+  </div>
+</div>
+
+<!-- ── Footer ───────────────────────────────────────────────────────────── -->
+<footer>
+  <div>
+    <span style="color:var(--text); font-weight:600;">⚡ cityXai</span>
+    &nbsp;— Souveräne kommunale KI-Plattform
+  </div>
+  <div class="footer-links">
+    <a href="#">Impressum</a>
+    <a href="#">Datenschutz</a>
+    <a href="#">Kontakt</a>
+    <a href="https://github.com/joyat/cityXai">GitHub</a>
+  </div>
+  <div>© 2026 cityXai. Alle Rechte vorbehalten.</div>
+</footer>
+
+<script>
+  // Intersection observer for scroll-triggered fade-in
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.glass-card, .feature-card, .compliance-item, .how-step').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
