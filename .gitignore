@@ -1,4 +1,12 @@
 secrets.txt
+# Runtime data
+data/audit/*.log
+data/incoming/*
+data/processed/*
+data/failed/*
+!data/**/.gitkeep
+# Cowork session
+.claude/
 .DS_Store
 .eclipse.buildship.core.prefs
 .gradle/
