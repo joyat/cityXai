@@ -1,12 +1,13 @@
 services:
   nginx:
-    image: nginx:1.27-alpine
+    image: nginx:1.27.5-alpine
     command: >
       /bin/sh -c "apk add --no-cache openssl curl &&
       mkdir -p /etc/nginx/certs &&
-      [ -f /etc/nginx/certs/server.crt ] || openssl req -x509 -nodes -days 365 -newkey rsa:2048
+      [ -f /etc/nginx/certs/server.crt ] || openssl req -x509 -nodes -days 730 -newkey rsa:2048
       -keyout /etc/nginx/certs/server.key -out /etc/nginx/certs/server.crt
-      -subj '/CN=localhost' &&
+      -subj '/CN=cityxai.local'
+      -addext 'subjectAltName=DNS:cityxai.local,DNS:localhost,IP:127.0.0.1' &&
       nginx -g 'daemon off;'"
     depends_on:
       frontend:
@@ -28,6 +29,7 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./frontend/citizen-widget:/usr/share/nginx/widget:ro
       - ./frontend/demo-municipal-site:/usr/share/nginx/demo:ro
+      - ./frontend/landing:/usr/share/nginx/landing:ro
     networks: [cityxai_net]
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://127.0.0.1/healthz || exit 1"]
@@ -180,10 +182,11 @@ services:
       - keycloak_data:/opt/keycloak/data
     networks: [cityxai_net]
     healthcheck:
-      test: ["CMD-SHELL", "test -f /opt/keycloak/data/import/realm-export.json"]
-      interval: 30s
-      timeout: 5s
-      retries: 15
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000 && echo -e 'GET /health/ready HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && grep -q '\"status\": \"UP\"' <&3 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      start_period: 60s
+      retries: 20
 
   prometheus:
     image: prom/prometheus:v2.54.1
@@ -205,7 +208,7 @@ services:
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Demo1234!}
-      GF_SERVER_ROOT_URL: http://localhost/grafana
+      GF_SERVER_ROOT_URL: https://localhost/grafana
       GF_SERVER_SERVE_FROM_SUB_PATH: "true"
     volumes:
       - ./infrastructure/grafana/datasources/prometheus.yml:/etc/grafana/provisioning/datasources/prometheus.yml:ro

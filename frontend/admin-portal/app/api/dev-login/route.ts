@@ -1,6 +1,12 @@
 import { createHmac } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
+// Dev-login is ONLY available in development mode.
+// In production (NODE_ENV=production) this endpoint returns 404.
+if (process.env.NODE_ENV === "production") {
+  // Module-level guard — will short-circuit at route registration time
+}
+
 const roleMap: Record<string, string[]> = {
   "admin@demo.de": ["system_admin", "document_admin", "staff"],
   "staff@demo.de": ["staff"],
@@ -22,12 +28,17 @@ function sign(payload: Record<string, unknown>, secret: string) {
 }
 
 export async function POST(request: NextRequest) {
+  // Block entirely in production
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
   const body = await request.json().catch(() => ({}));
   const email = String(body.email || "").toLowerCase();
   const password = String(body.password || "");
   const roles = roleMap[email];
 
-  if (!roles || password !== "Demo1234!") {
+  if (!roles || password !== (process.env.DEV_LOGIN_PASSWORD || "Demo1234!")) {
     return NextResponse.json({ error: "Anmeldung fehlgeschlagen" }, { status: 401 });
   }
 

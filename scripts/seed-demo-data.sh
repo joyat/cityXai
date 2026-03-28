@@ -4,7 +4,7 @@ set -eu
 BASE_URL="${BASE_URL:-https://localhost}"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
-INGEST_CONTAINER="${INGEST_CONTAINER:-microservices-demo-ingest-api-1}"
+INGEST_CONTAINER="${INGEST_CONTAINER:-cityxai-ingest-api-1}"
 ENV_FILE="${ENV_FILE:-.env}"
 
 read_env_file_var() {
@@ -79,9 +79,9 @@ if ! curl_download "https://www.stadt-paderborn.de" "$TMP_DIR/source.html"; then
   :
 fi
 
-wait_for_container_health microservices-demo-nginx-1
-wait_for_container_health microservices-demo-ingest-api-1
-wait_for_container_health microservices-demo-chat-api-1
+wait_for_container_health cityxai-nginx-1
+wait_for_container_health cityxai-ingest-api-1
+wait_for_container_health cityxai-chat-api-1
 
 make_fallback_docs
 
