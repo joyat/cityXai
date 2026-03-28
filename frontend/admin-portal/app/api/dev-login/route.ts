@@ -1,12 +1,6 @@
 import { createHmac } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
-// Dev-login is ONLY available in development mode.
-// In production (NODE_ENV=production) this endpoint returns 404.
-if (process.env.NODE_ENV === "production") {
-  // Module-level guard — will short-circuit at route registration time
-}
-
 const roleMap: Record<string, string[]> = {
   "admin@demo.de": ["system_admin", "document_admin", "staff"],
   "staff@demo.de": ["staff"],
@@ -28,8 +22,7 @@ function sign(payload: Record<string, unknown>, secret: string) {
 }
 
 export async function POST(request: NextRequest) {
-  // Block entirely in production
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.DEMO_LOGIN_ENABLED !== "true") {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 

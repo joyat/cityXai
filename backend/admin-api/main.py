@@ -11,6 +11,7 @@ from pathlib import Path
 import chromadb
 import httpx
 from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse, StreamingResponse
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -18,8 +19,25 @@ from starlette.requests import Request
 from starlette.responses import Response
 
 from auth import ROLE_PERMISSIONS
-from backend.shared.auth import require_roles
+from backend.shared.auth import check_required_secrets, require_roles
 from backend.shared.models import UserClaim
+
+
+def _log_admin_event(action: str, operator_id: str, target: str, detail: str = "") -> None:
+    """Append an admin operation to the audit log for traceability."""
+    base = Path("/data/audit")
+    base.mkdir(parents=True, exist_ok=True)
+    entry = {
+        "timestamp": datetime.utcnow().isoformat(),
+        "event_type": "admin_action",
+        "action": action,
+        "operator_id_hash": __import__("hashlib").sha256(operator_id.encode()).hexdigest(),
+        "target": target,
+        "detail": detail,
+    }
+    log_path = base / f"admin-{datetime.utcnow():%Y-%m-%d}.log"
+    with log_path.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
 
 REQUEST_COUNT = Counter("admin_api_requests_total", "Total admin api requests", ["method", "path", "status"])
@@ -36,9 +54,21 @@ class MetricsMiddleware(BaseHTTPMiddleware):
         return response
 
 
-app = FastAPI(title="cityXai Admin API")
+app = FastAPI(title="cityXai Admin API", docs_url=None, redoc_url=None)
 app.add_middleware(MetricsMiddleware)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[os.getenv("FRONTEND_ORIGIN", "https://localhost")],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "DELETE"],
+    allow_headers=["Authorization", "Content-Type", "X-Namespace"],
+)
 chroma = chromadb.HttpClient(host=os.getenv("CHROMADB_HOST", "chromadb"), port=int(os.getenv("CHROMADB_PORT", "8000")))
+
+
+@app.on_event("startup")
+def on_startup() -> None:
+    check_required_secrets()
 
 
 def ensure_permission(claim: UserClaim, permission: str) -> None:
@@ -203,6 +233,12 @@ async def create_user(payload: dict, claim: UserClaim = Depends(require_roles(["
             headers={"Authorization": f"Bearer {token}"},
             json=[role_response.json()],
         )
+    _log_admin_event(
+        action="create_user",
+        operator_id=claim.sub,
+        target=payload["email"],
+        detail=f"role={payload.get('role', 'staff')}",
+    )
     return {"status": "created"}
 
 
@@ -217,4 +253,9 @@ async def delete_user(user_id: str, claim: UserClaim = Depends(require_roles(["s
         )
     if response.status_code not in {200, 204}:
         raise HTTPException(status_code=response.status_code, detail=response.text)
+    _log_admin_event(
+        action="delete_user",
+        operator_id=claim.sub,
+        target=user_id,
+    )
     return {"status": "deleted", "user_id": user_id}

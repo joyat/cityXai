@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 import threading
 import time
@@ -9,13 +10,14 @@ from datetime import datetime
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
 
-from backend.shared.auth import require_roles
+from backend.shared.auth import check_required_secrets, require_roles
 from backend.shared.models import IngestJob, UserClaim
 from chunker import SemanticChunker
 from embedder import Embedder
@@ -40,11 +42,30 @@ class MetricsMiddleware(BaseHTTPMiddleware):
         return response
 
 
-app = FastAPI(title="cityXai Ingest API")
+_MAX_UPLOAD_BYTES = int(os.getenv("MAX_UPLOAD_MB", "100")) * 1024 * 1024
+
+app = FastAPI(title="cityXai Ingest API", docs_url=None, redoc_url=None)
 app.add_middleware(MetricsMiddleware)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[os.getenv("FRONTEND_ORIGIN", "https://localhost")],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "DELETE"],
+    allow_headers=["Authorization", "Content-Type", "X-Namespace"],
+)
 jobs: dict[str, IngestJob] = {}
 embedder = Embedder()
 chunker = SemanticChunker(chunk_size=int(os.getenv("CHUNK_SIZE", "512")), overlap=int(os.getenv("CHUNK_OVERLAP", "50")))
+
+
+def _normalize_metadata(metadata: dict) -> dict:
+    normalized = {}
+    for key, value in metadata.items():
+        if isinstance(value, (str, int, float, bool)) or value is None:
+            normalized[key] = value
+        else:
+            normalized[key] = json.dumps(value, ensure_ascii=True)
+    return normalized
 
 
 def process_document(filename: str, file_bytes: bytes, classification: str, uploader_id: str, department: str = "Allgemein") -> IngestJob:
@@ -63,7 +84,7 @@ def process_document(filename: str, file_bytes: bytes, classification: str, uplo
             classification=classification,
             uploader_id_hash=uploader_hash,
         )
-        doc_meta = {
+        doc_meta = _normalize_metadata({
             "filename": filename,
             "department": department,
             "classification": classification,
@@ -72,7 +93,7 @@ def process_document(filename: str, file_bytes: bytes, classification: str, uplo
             "uploader_id_hash": uploader_hash,
             "doc_id": doc_id,
             **metadata,
-        }
+        })
         chunks = chunker.split(markdown, doc_id=doc_id)
         created = embedder.upsert_chunks(chunks, doc_meta, classification)
         DOCUMENT_COUNT.labels(classification).inc()
@@ -89,6 +110,7 @@ def process_document(filename: str, file_bytes: bytes, classification: str, uplo
 
 @app.on_event("startup")
 def on_startup() -> None:
+    check_required_secrets()
     start_watcher(process_document)
 
 
@@ -102,6 +124,9 @@ async def metrics() -> Response:
     return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
+_ALLOWED_CLASSIFICATIONS = {"public", "internal"}
+
+
 @app.post("/ingest/upload")
 async def upload_document(
     file: UploadFile = File(...),
@@ -109,8 +134,17 @@ async def upload_document(
     department: str = Form("Allgemein"),
     claim: UserClaim = Depends(require_roles(["document_admin", "system_admin"])),
 ):
+    if classification not in _ALLOWED_CLASSIFICATIONS:
+        raise HTTPException(status_code=400, detail=f"Ungültige Klassifizierung. Erlaubt: {_ALLOWED_CLASSIFICATIONS}")
     file_bytes = await file.read()
-    job = process_document(file.filename, file_bytes, classification, claim.sub, department)
+    if len(file_bytes) > _MAX_UPLOAD_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail=f"Datei zu groß. Maximale Größe: {_MAX_UPLOAD_BYTES // (1024 * 1024)} MB",
+        )
+    if not file_bytes:
+        raise HTTPException(status_code=400, detail="Leere Datei")
+    job = process_document(file.filename or "unnamed", file_bytes, classification, claim.sub, department)
     return {"job_id": job.job_id, "doc_id": job.doc_id}
 
 

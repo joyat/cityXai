@@ -49,6 +49,8 @@
   "users": [
     {
       "username": "admin@demo.de",
+      "firstName": "System",
+      "lastName": "Admin",
       "email": "admin@demo.de",
       "emailVerified": true,
       "enabled": true,
@@ -58,6 +60,8 @@
     },
     {
       "username": "staff@demo.de",
+      "firstName": "Mara",
+      "lastName": "Mitarbeit",
       "email": "staff@demo.de",
       "emailVerified": true,
       "enabled": true,
@@ -67,6 +71,8 @@
     },
     {
       "username": "docadmin@demo.de",
+      "firstName": "Dora",
+      "lastName": "Dokument",
       "email": "docadmin@demo.de",
       "emailVerified": true,
       "enabled": true,
@@ -76,6 +82,8 @@
     },
     {
       "username": "auditor@demo.de",
+      "firstName": "Arne",
+      "lastName": "Audit",
       "email": "auditor@demo.de",
       "emailVerified": true,
       "enabled": true,
@@ -85,6 +93,8 @@
     },
     {
       "username": "citizen@demo.de",
+      "firstName": "Clara",
+      "lastName": "Buerger",
       "email": "citizen@demo.de",
       "emailVerified": true,
       "enabled": true,

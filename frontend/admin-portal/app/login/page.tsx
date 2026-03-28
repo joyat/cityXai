@@ -1,8 +1,10 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { LanguageSelector, useI18n } from "../../lib/i18n";
 
 export default function LoginPage() {
+  const { language } = useI18n();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -31,11 +33,11 @@ export default function LoginPage() {
         });
         data = await response.json();
       }
-      if (!response.ok || !data.access_token) throw new Error(data.error_description || "Login fehlgeschlagen");
+      if (!response.ok || !data.access_token) throw new Error(data.error_description || data.error || (language === "de" ? "Login fehlgeschlagen" : "Login failed"));
       document.cookie = `cityxai_token=${encodeURIComponent(data.access_token)}; Path=/; SameSite=Lax`;
       window.location.href = "/dashboard";
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login fehlgeschlagen");
+      setError(err instanceof Error ? err.message : (language === "de" ? "Login fehlgeschlagen" : "Login failed"));
     } finally {
       setLoading(false);
     }
@@ -58,15 +60,18 @@ export default function LoginPage() {
         border:"1px solid rgba(255,255,255,0.10)", borderRadius:"22px",
         padding:"40px 34px", boxShadow:"0 24px 80px rgba(0,0,0,0.5)",
       }}>
+        <div style={{ display:"flex", justifyContent:"flex-end", marginBottom:18 }}>
+          <LanguageSelector />
+        </div>
         <div style={{ marginBottom:30, textAlign:"center" }}>
           <div style={{ display:"flex", justifyContent:"center", marginBottom:14 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/logo.svg"
               alt="cityXai"
-              width={72}
-              height={64}
-              style={{ filter:"drop-shadow(0 0 18px rgba(0,212,255,0.45))" }}
+              width={88}
+              height={88}
+              style={{ filter:"drop-shadow(0 0 18px rgba(0,212,255,0.45))", borderRadius: 16 }}
             />
           </div>
           <h1 style={{
@@ -75,29 +80,29 @@ export default function LoginPage() {
             WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text",
           }}>cityXai</h1>
           <p style={{ color:"var(--text-muted)", fontSize:"0.82rem", marginTop:5 }}>
-            Souveräne kommunale KI-Plattform
+            {language === "de" ? "Souveräne kommunale KI-Plattform" : "Sovereign municipal AI platform"}
           </p>
         </div>
 
         <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
           <div>
-            <label>E-Mail-Adresse</label>
-            <input name="email" type="email" placeholder="name@gemeinde.de" autoComplete="email" />
+            <label>{language === "de" ? "E-Mail-Adresse" : "Email address"}</label>
+            <input name="email" type="email" placeholder={language === "de" ? "name@gemeinde.de" : "name@municipality.de"} autoComplete="email" />
           </div>
           <div>
-            <label>Passwort</label>
+            <label>{language === "de" ? "Passwort" : "Password"}</label>
             <input name="password" type="password" placeholder="••••••••" autoComplete="current-password" />
           </div>
         </div>
 
         <button type="submit" disabled={loading} style={{ marginTop:22, width:"100%", justifyContent:"center", padding:"12px 18px", fontSize:"0.9rem", opacity:loading?0.75:1 }}>
-          {loading ? "Wird angemeldet…" : "Anmelden"}
+          {loading ? (language === "de" ? "Wird angemeldet…" : "Signing in…") : (language === "de" ? "Anmelden" : "Sign in")}
         </button>
 
         {error && <p className="text-danger" style={{ textAlign:"center" }}>{error}</p>}
 
         <p style={{ marginTop:22, textAlign:"center", fontSize:"0.7rem", color:"var(--text-faint)", lineHeight:1.6 }}>
-          DSGVO-konform · Lokal gehostet · KI-Verordnung Art. 13
+          {language === "de" ? "DSGVO-konform · Lokal gehostet · KI-Verordnung Art. 13" : "GDPR-aligned · Locally hosted · AI Act Art. 13"}
         </p>
       </form>
     </div>

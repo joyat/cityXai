@@ -95,36 +95,16 @@ token_response="$(curl -kfsS -X POST "$BASE_URL/keycloak/realms/cityxai/protocol
 TOKEN="$(printf '%s' "$token_response" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("access_token",""))' 2>/dev/null || true)"
 
 if [ -z "$TOKEN" ]; then
-  TOKEN="$(python3 - <<'PY'
-import base64
-import hashlib
-import hmac
-import json
-import os
-import time
+  echo "Keycloak password grant unavailable; falling back to demo login." >&2
+  fallback_response="$(curl -kfsS -X POST "$BASE_URL/api/dev-login" \
+    -H 'Content-Type: application/json' \
+    -d '{"email":"docadmin@demo.de","password":"Demo1234!"}')"
+  TOKEN="$(printf '%s' "$fallback_response" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("access_token",""))')"
+fi
 
-def b64url(data: bytes) -> str:
-    return base64.urlsafe_b64encode(data).rstrip(b"=").decode("ascii")
-
-secret = os.getenv("JWT_SECRET", "dev-secret")
-header = {"alg": "HS256", "typ": "JWT"}
-now = int(time.time())
-payload = {
-    "sub": "seed-docadmin",
-    "email": "docadmin@demo.de",
-    "preferred_username": "docadmin@demo.de",
-    "municipality": os.getenv("MUNICIPALITY_NAMESPACE", "paderborn"),
-    "realm_access": {"roles": ["document_admin", "staff"]},
-    "iat": now,
-    "exp": now + 3600,
-}
-header_b64 = b64url(json.dumps(header, separators=(",", ":")).encode("utf-8"))
-payload_b64 = b64url(json.dumps(payload, separators=(",", ":")).encode("utf-8"))
-signing_input = f"{header_b64}.{payload_b64}".encode("ascii")
-signature = b64url(hmac.new(secret.encode("utf-8"), signing_input, hashlib.sha256).digest())
-print(f"{header_b64}.{payload_b64}.{signature}")
-PY
-)"
+if [ -z "$TOKEN" ]; then
+  echo "Failed to obtain an access token for docadmin@demo.de" >&2
+  exit 1
 fi
 
 for file in "$TMP_DIR/bebauungsplan.pdf" "$TMP_DIR/haushaltssatzung.docx" "$TMP_DIR/abfallkalender.xlsx"
@@ -137,13 +117,14 @@ do
     -F "file=@$file"
 done
 
-for i in $(seq 1 24)
+for i in $(seq 1 3)
 do
   curl -kfsS -X POST "$BASE_URL/api/chat/query" \
     -H "Authorization: Bearer $TOKEN" \
     -H "X-Namespace: ${MUNICIPALITY_NAMESPACE:-paderborn}" \
     -H "Content-Type: application/json" \
-    -d '{"query":"Welche Regeln gelten im Musterquartier?","namespace":"public","conversation_history":[]}' >/dev/null || true
+    -d '{"query":"Welche Regeln gelten im Musterquartier?","namespace":"public","conversation_history":[]}' >/dev/null
+  sleep 1
 done
 
 echo "Demo data seeded."

@@ -18,9 +18,9 @@ class IngestJob(BaseModel):
 
 
 class QueryRequest(BaseModel):
-    query: str
-    namespace: str
-    conversation_history: list[dict[str, str]] = Field(default_factory=list)
+    query: str = Field(min_length=1, max_length=2000)
+    namespace: str = Field(min_length=1, max_length=64)
+    conversation_history: list[dict[str, str]] = Field(default_factory=list, max_length=50)
     retrieval_mode: Literal["hybrid", "dense"] = "hybrid"
 
 
@@ -30,6 +30,7 @@ class QueryResponse(BaseModel):
     confidence: float
     flagged: bool
     latency_ms: int
+    session_id: str | None = None
     retrieved_chunks: list[dict[str, Any]] = Field(default_factory=list)
     retrieval_scores: list[float] = Field(default_factory=list)
     expanded_queries: list[str] = Field(default_factory=list)
