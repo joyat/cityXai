@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { Shell } from "../../components/shell";
+import { useI18n } from "../../lib/i18n";
 import { apiFetch } from "../../lib/api";
 
 const services = ["nginx","frontend","chat-api","ingest-api","admin-api","ollama","chromadb","keycloak","prometheus","grafana"];
@@ -22,6 +23,7 @@ function buildSparkPoints(data: number[], w = 200, h = 52, pad = 4): string {
 }
 
 export default function DashboardPage() {
+  const { language } = useI18n();
   const [summary, setSummary] = useState<any>(null);
   const [sparkData, setSparkData] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,10 +61,10 @@ export default function DashboardPage() {
   }, [fetchMetrics]);
 
   const metrics = [
-    { label: "Dokumente",    value: summary?.total_documents     ?? "—", unit: "" },
-    { label: "Anfragen 24h", value: summary?.total_queries_24h   ?? "—", unit: "" },
-    { label: "Ø Latenz",     value: summary ? Math.round(summary.avg_latency_ms) : "—", unit: "ms" },
-    { label: "Speicher",     value: summary ? (summary.storage_bytes / 1024 / 1024).toFixed(1) : "—", unit: "MB" },
+    { label: language === "de" ? "Dokumente" : "Documents", value: summary?.total_documents ?? "—", unit: "" },
+    { label: language === "de" ? "Anfragen 24h" : "Queries 24h", value: summary?.total_queries_24h ?? "—", unit: "" },
+    { label: language === "de" ? "Ø Latenz" : "Avg latency", value: summary ? Math.round(summary.avg_latency_ms) : "—", unit: "ms" },
+    { label: language === "de" ? "Speicher" : "Storage", value: summary ? (summary.storage_bytes / 1024 / 1024).toFixed(1) : "—", unit: "MB" },
   ];
 
   const linePoints = buildSparkPoints(sparkData);
@@ -75,12 +77,12 @@ export default function DashboardPage() {
       <div className="header">
         <div>
           <h1>Dashboard</h1>
-          <p>Echtzeit-Überblick über Dokumente, Anfragen und Systemzustand.</p>
+          <p>{language === "de" ? "Echtzeit-Überblick über Dokumente, Anfragen und Systemzustand." : "Real-time overview of documents, queries, and system health."}</p>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {lastRefresh && (
             <span style={{ fontSize: "0.72rem", color: "var(--text-faint)" }}>
-              Aktualisiert {lastRefresh.toLocaleTimeString("de-DE")}
+              {language === "de" ? "Aktualisiert" : "Updated"} {lastRefresh.toLocaleTimeString(language === "de" ? "de-DE" : "en-GB")}
             </span>
           )}
           <button
@@ -89,7 +91,7 @@ export default function DashboardPage() {
             style={{ padding: "7px 14px", fontSize: "0.8rem" }}
             disabled={loading}
           >
-            {loading ? "…" : "↻ Neu laden"}
+            {loading ? "…" : (language === "de" ? "↻ Neu laden" : "↻ Refresh")}
           </button>
         </div>
       </div>
@@ -110,7 +112,7 @@ export default function DashboardPage() {
 
       <div className="grid cols-2">
         <div className="card">
-          <h3>Anfragevolumen 24h</h3>
+          <h3>{language === "de" ? "Anfragevolumen 24h" : "Query volume 24h"}</h3>
           <div className="sparkline">
             <svg viewBox="0 0 200 52" preserveAspectRatio="none">
               <defs>
@@ -130,14 +132,14 @@ export default function DashboardPage() {
               )}
               {!sparkData.length && (
                 <text x="100" y="30" textAnchor="middle" fill="rgba(255,255,255,0.15)" fontSize="9">
-                  Keine Daten
+                  {language === "de" ? "Keine Daten" : "No data"}
                 </text>
               )}
             </svg>
           </div>
           {summary?.avg_confidence != null && (
             <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: 8 }}>
-              Ø Konfidenz: <strong style={{ color: "var(--cyan)" }}>
+              {language === "de" ? "Ø Konfidenz:" : "Avg confidence:"} <strong style={{ color: "var(--cyan)" }}>
                 {(summary.avg_confidence * 100).toFixed(0)}%
               </strong>
             </p>
@@ -145,7 +147,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="card">
-          <h3>Systemstatus</h3>
+          <h3>{language === "de" ? "Systemstatus" : "System status"}</h3>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 8 }}>
             {services.map((svc) => {
               const isUp = summary?.services?.[svc] !== false;

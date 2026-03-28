@@ -1,60 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 180" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" fill="none">
   <defs>
-    <!-- Main gradient matching the logo: cyan top → mid-blue → dark navy -->
-    <linearGradient id="logoGrad" x1="100" y1="0" x2="100" y2="180" gradientUnits="userSpaceOnUse">
-      <stop offset="0%"   stop-color="#7ee8ff"/>
-      <stop offset="40%"  stop-color="#2ba8d4"/>
-      <stop offset="100%" stop-color="#0d2b5e"/>
-    </linearGradient>
-    <!-- Slightly brighter for the X fill -->
-    <linearGradient id="xGrad" x1="100" y1="35" x2="100" y2="148" gradientUnits="userSpaceOnUse">
-      <stop offset="0%"   stop-color="#a0edff"/>
-      <stop offset="50%"  stop-color="#2ba8d4"/>
-      <stop offset="100%" stop-color="#1040a0"/>
+    <linearGradient id="g" x1="64" y1="3" x2="64" y2="116" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#a8f0ff"/>
+      <stop offset="0.4" stop-color="#2ba8d4"/>
+      <stop offset="1" stop-color="#0a2a5e"/>
     </linearGradient>
   </defs>
 
-  <!-- ─── Communication tower ─── -->
-  <!-- Needle -->
-  <line x1="100" y1="2" x2="100" y2="28" stroke="url(#logoGrad)" stroke-width="2.2" stroke-linecap="round"/>
-  <!-- Top crossbar -->
-  <line x1="94" y1="12" x2="106" y2="12" stroke="url(#logoGrad)" stroke-width="1.8" stroke-linecap="round"/>
-  <!-- Base disk / platform -->
-  <ellipse cx="100" cy="28" rx="7" ry="3.5" stroke="url(#logoGrad)" stroke-width="1.8"/>
+  <!-- Tower spire -->
+  <line x1="64" y1="3" x2="64" y2="20" stroke="url(#g)" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Tower cap -->
+  <line x1="57" y1="20" x2="71" y2="20" stroke="url(#g)" stroke-width="3" stroke-linecap="round"/>
+  <!-- Tower mid section -->
+  <line x1="60" y1="26" x2="68" y2="26" stroke="url(#g)" stroke-width="2" stroke-linecap="round"/>
+  <!-- Tower base block -->
+  <rect x="59" y="30" width="10" height="5" rx="1.5" fill="url(#g)"/>
 
-  <!-- ─── Left city buildings (outline) ─── -->
-  <!-- Far-left tall building -->
-  <polyline points="14,148 14,60 29,60 29,148" stroke="url(#logoGrad)" stroke-width="2.2" stroke-linejoin="round"/>
-  <!-- Second building -->
-  <polyline points="34,148 34,74 46,74 46,148" stroke="url(#logoGrad)" stroke-width="2.2" stroke-linejoin="round"/>
-  <!-- Third building (close to X) -->
-  <polyline points="51,148 51,88 62,88 62,148" stroke="url(#logoGrad)" stroke-width="2.2" stroke-linejoin="round"/>
+  <!-- Left buildings (outline only) -->
+  <rect x="6"  y="50" width="11" height="66" stroke="url(#g)" stroke-width="2.5" stroke-linejoin="round"/>
+  <rect x="21" y="35" width="13" height="81" stroke="url(#g)" stroke-width="2.5" stroke-linejoin="round"/>
 
-  <!-- ─── Right city buildings (mirror) ─── -->
-  <polyline points="138,148 138,88 149,88 149,148" stroke="url(#logoGrad)" stroke-width="2.2" stroke-linejoin="round"/>
-  <polyline points="154,148 154,74 166,74 166,148" stroke="url(#logoGrad)" stroke-width="2.2" stroke-linejoin="round"/>
-  <polyline points="171,148 171,60 186,60 186,148" stroke="url(#logoGrad)" stroke-width="2.2" stroke-linejoin="round"/>
+  <!-- Right buildings (mirrored) -->
+  <rect x="94"  y="35" width="13" height="81" stroke="url(#g)" stroke-width="2.5" stroke-linejoin="round"/>
+  <rect x="111" y="50" width="11" height="66" stroke="url(#g)" stroke-width="2.5" stroke-linejoin="round"/>
 
-  <!-- ─── Ground line ─── -->
-  <line x1="10" y1="148" x2="190" y2="148" stroke="url(#logoGrad)" stroke-width="2" stroke-linecap="round"/>
-
-  <!-- ─── X mark (solid filled shape) ─── -->
-  <!--
-    Classic X shape built as a polygon.
-    Coordinates derived from viewing the logo:
-    The X spans roughly x: 60–140, y: 35–148
-    Center is (100, 92)
-  -->
-  <path d="
-    M 68,35
-    L 86,35  L 100,58  L 114,35  L 132,35
-    L 132,52
-    L 113,92
-    L 132,132 L 132,148
-    L 114,148 L 100,126 L 86,148  L 68,148
-    L 68,132
-    L 87,92
-    L 68,52
-    Z
-  " fill="url(#xGrad)" opacity="0.92"/>
+  <!-- X shape — the main mark -->
+  <line x1="36" y1="34" x2="97" y2="115" stroke="url(#g)" stroke-width="7" stroke-linecap="round"/>
+  <line x1="92" y1="34" x2="31" y2="115" stroke="url(#g)" stroke-width="7" stroke-linecap="round"/>
 </svg>

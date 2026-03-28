@@ -13,6 +13,10 @@ class SemanticChunker:
         return len(text.split())
 
     def split(self, markdown: str, doc_id: str) -> list[dict]:
+        if markdown.startswith("---\n"):
+            parts = markdown.split("\n---\n", 1)
+            if len(parts) == 2:
+                markdown = parts[1].lstrip()
         lines = markdown.splitlines()
         sections: list[tuple[str, list[str]]] = []
         current_heading = "Einleitung"

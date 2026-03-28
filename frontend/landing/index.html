@@ -9,20 +9,22 @@
 
     /* ── Tokens ── */
     :root {
-      --cyan:    #00d4ff;
-      --blue:    #1a7ab5;
-      --navy:    #0d2b5e;
+      --cyan:    #6cecff;
+      --blue:    #2f8df8;
+      --navy:    #102a72;
       /* alias kept for badge classes */
-      --violet:  #1a7ab5;
-      --bg:      #0a0e27;
-      --bg-card: rgba(255,255,255,0.05);
-      --border:  rgba(255,255,255,0.09);
-      --text:    #e2e8f5;
-      --muted:   #6b7a99;
-      --faint:   #2e3a55;
+      --violet:  #6f7cff;
+      --bg:      #060816;
+      --bg-card: rgba(255,255,255,0.06);
+      --border:  rgba(170,205,255,0.14);
+      --text:    #ecf4ff;
+      --muted:   #8fa4c3;
+      --faint:   #30405f;
       --success: #10b981;
-      --grad:    linear-gradient(135deg,#7ee8ff 0%,#2ba8d4 50%,#0d2b5e 100%);
-      --r:       16px;
+      --grad:    linear-gradient(135deg,#9cf5ff 0%,#4ab6ff 38%,#6f7cff 68%,#102a72 100%);
+      --grad-soft: linear-gradient(135deg, rgba(108,236,255,0.18), rgba(111,124,255,0.14));
+      --r:       22px;
+      --shadow-lg: 0 30px 80px rgba(0,0,0,0.42);
     }
 
     /* ── Reset ── */
@@ -30,11 +32,35 @@
     html { scroll-behavior: smooth; }
     body {
       font-family: 'Inter', -apple-system, sans-serif;
-      background: var(--bg);
+      background:
+        radial-gradient(circle at 20% 12%, rgba(108,236,255,0.14), transparent 24%),
+        radial-gradient(circle at 80% 18%, rgba(111,124,255,0.16), transparent 28%),
+        radial-gradient(circle at 50% 78%, rgba(47,141,248,0.10), transparent 26%),
+        linear-gradient(180deg, #070a19 0%, #090d1f 34%, #060816 100%);
       color: var(--text);
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
+      position: relative;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: radial-gradient(circle at center, black 45%, transparent 88%);
+      pointer-events: none;
+      opacity: 0.34;
+    }
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent 12%, transparent 88%, rgba(255,255,255,0.02));
+      pointer-events: none;
     }
     a { color: inherit; text-decoration: none; }
     img { display: block; max-width: 100%; }
@@ -75,9 +101,10 @@
       align-items: center;
       justify-content: space-between;
       padding: 16px 40px;
-      background: rgba(10,14,39,0.85);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
+      background: rgba(7,10,25,0.58);
+      backdrop-filter: blur(18px) saturate(160%);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.22);
     }
     .nav-brand {
       font-size: 1.15rem;
@@ -90,8 +117,8 @@
       animation: gradientShift 6s ease-in-out infinite;
     }
     .nav-links { display: flex; gap: 28px; align-items: center; }
-    .nav-links a { font-size: 0.875rem; color: var(--muted); transition: color 0.2s; }
-    .nav-links a:hover { color: var(--text); }
+    .nav-links a { font-size: 0.875rem; color: var(--muted); transition: color 0.2s, text-shadow 0.2s; }
+    .nav-links a:hover { color: var(--text); text-shadow: 0 0 12px rgba(108,236,255,0.2); }
     .btn-nav {
       padding: 8px 18px;
       border-radius: 10px;
@@ -103,12 +130,89 @@
       border: none;
       cursor: pointer;
       animation: gradientShift 6s ease-in-out infinite;
-      transition: box-shadow 0.2s, transform 0.2s;
+      transition: box-shadow 0.2s, transform 0.2s, filter 0.2s;
     }
-    .btn-nav:hover { box-shadow: 0 0 22px rgba(0,212,255,0.4); transform: translateY(-1px); }
+    .btn-nav:hover { box-shadow: 0 0 28px rgba(108,236,255,0.34); transform: translateY(-1px); filter: brightness(1.06); }
+    .lang-switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 18px;
+    }
+    .lang-switch button {
+      padding: 6px 10px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .lang-switch button.active {
+      color: var(--text);
+      border-color: rgba(0,212,255,0.28);
+      background: rgba(0,212,255,0.12);
+    }
 
     /* ── Section base ── */
     section { padding: 100px 40px; max-width: 1160px; margin: 0 auto; }
+
+    /* ── Control band ── */
+    .control-band {
+      max-width: 1160px;
+      margin: -26px auto 0;
+      padding: 0 40px;
+      position: relative;
+      z-index: 3;
+    }
+    .control-band-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .control-card {
+      position: relative;
+      border-radius: 22px;
+      padding: 22px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+      border: 1px solid rgba(166,214,255,0.16);
+      backdrop-filter: blur(18px) saturate(150%);
+      box-shadow: 0 18px 54px rgba(0,0,0,0.26);
+      overflow: hidden;
+    }
+    .control-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right, rgba(108,236,255,0.14), transparent 36%);
+      pointer-events: none;
+    }
+    .control-card-label {
+      position: relative;
+      z-index: 1;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--cyan);
+      margin-bottom: 10px;
+    }
+    .control-card-title {
+      position: relative;
+      z-index: 1;
+      font-size: 1.02rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    .control-card-desc {
+      position: relative;
+      z-index: 1;
+      font-size: 0.83rem;
+      line-height: 1.65;
+      color: var(--muted);
+    }
 
     /* ── Hero ── */
     .hero-wrap {
@@ -119,7 +223,7 @@
       text-align: center;
       position: relative;
       overflow: hidden;
-      padding: 140px 40px 100px;
+      padding: 148px 40px 100px;
     }
     .hero-orb {
       position: absolute;
@@ -127,11 +231,25 @@
       filter: blur(80px);
       pointer-events: none;
     }
-    .hero-orb-1 { width:500px; height:500px; background:rgba(0,212,255,0.09); top:-100px; left:-80px; animation: floatY 8s ease-in-out infinite; }
-    .hero-orb-2 { width:420px; height:420px; background:rgba(26,122,181,0.08); bottom:-60px; right:-60px; animation: floatY 10s 2s ease-in-out infinite; }
-    .hero-orb-3 { width:280px; height:280px; background:rgba(0,212,255,0.05); top:40%; left:50%; transform:translate(-50%,-50%); animation: floatY 12s 1s ease-in-out infinite; }
+    .hero-orb-1 { width:540px; height:540px; background:rgba(108,236,255,0.14); top:-120px; left:-80px; animation: floatY 8s ease-in-out infinite; }
+    .hero-orb-2 { width:500px; height:500px; background:rgba(111,124,255,0.14); bottom:-90px; right:-60px; animation: floatY 10s 2s ease-in-out infinite; }
+    .hero-orb-3 { width:320px; height:320px; background:rgba(47,141,248,0.08); top:42%; left:54%; transform:translate(-50%,-50%); animation: floatY 12s 1s ease-in-out infinite; }
 
-    .hero-inner { position: relative; z-index: 1; max-width: 820px; }
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 420px;
+      gap: 34px;
+      align-items: center;
+    }
+    .hero-copy { text-align: left; }
+    .hero-side {
+      display: grid;
+      gap: 18px;
+      align-items: start;
+    }
 
     .hero-badge {
       display: inline-flex;
@@ -168,10 +286,10 @@
       font-size: clamp(1rem, 2.5vw, 1.2rem);
       color: var(--muted);
       max-width: 620px;
-      margin: 0 auto 38px;
+      margin: 0 0 38px;
       line-height: 1.7;
     }
-    .hero-ctas { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .hero-ctas { display: flex; gap: 14px; justify-content: flex-start; flex-wrap: wrap; }
     .btn-primary {
       padding: 14px 30px;
       border-radius: 12px;
@@ -205,12 +323,196 @@
       margin-top: 60px;
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       gap: 20px;
       font-size: 0.8rem;
       color: var(--faint);
     }
     .hero-scroll-line { width: 1px; height: 40px; background: linear-gradient(to bottom, transparent, var(--faint)); }
+    .hero-panel {
+      position: relative;
+      border-radius: 28px;
+      border: 1px solid rgba(166,214,255,0.16);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03)),
+        linear-gradient(135deg, rgba(108,236,255,0.08), rgba(111,124,255,0.06));
+      backdrop-filter: blur(18px) saturate(150%);
+      box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.08);
+      padding: 18px;
+      overflow: hidden;
+    }
+    .hero-panel::before {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      background: linear-gradient(135deg, rgba(108,236,255,0.28), transparent 32%, transparent 68%, rgba(111,124,255,0.24));
+      opacity: 0.42;
+      pointer-events: none;
+    }
+    .hero-panel-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      position: relative;
+      z-index: 1;
+    }
+    .hero-panel-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--cyan);
+    }
+    .hero-chip {
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05);
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+    .hero-panel-grid {
+      display: grid;
+      gap: 14px;
+      position: relative;
+      z-index: 1;
+    }
+    .hero-card {
+      border-radius: 20px;
+      padding: 18px;
+      background: rgba(7,12,28,0.56);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+    }
+    .hero-card-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .hero-card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      line-height: 1.35;
+      margin-bottom: 10px;
+    }
+    .hero-card-desc {
+      font-size: 0.83rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .hero-stat {
+      border-radius: 16px;
+      padding: 14px 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      text-align: center;
+    }
+    .hero-stat strong {
+      display: block;
+      font-size: 1.1rem;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+    .hero-stat span {
+      display: block;
+      margin-top: 4px;
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+    .flow-box {
+      position: relative;
+      border-radius: 28px;
+      border: 1px solid rgba(166,214,255,0.16);
+      background:
+        radial-gradient(circle at 50% 0%, rgba(108,236,255,0.10), transparent 42%),
+        linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03)),
+        linear-gradient(135deg, rgba(108,236,255,0.08), rgba(111,124,255,0.06));
+      backdrop-filter: blur(18px) saturate(150%);
+      box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.08);
+      padding: 18px;
+      overflow: hidden;
+    }
+    .flow-box::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 28px 28px;
+      opacity: 0.34;
+      pointer-events: none;
+    }
+    .flow-steps {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 12px;
+      margin-top: 4px;
+    }
+    .flow-step {
+      display: grid;
+      grid-template-columns: 46px 1fr;
+      gap: 12px;
+      align-items: start;
+      position: relative;
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(162, 219, 255, 0.16);
+      background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 18px 34px rgba(0,0,0,0.16);
+    }
+    .flow-step:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 36px;
+      top: calc(100% + 2px);
+      width: 2px;
+      height: 14px;
+      background: linear-gradient(to bottom, rgba(108,236,255,0.7), rgba(111,124,255,0.12));
+    }
+    .flow-step-num {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: #fff;
+      background: var(--grad);
+      box-shadow: 0 0 18px rgba(108,236,255,0.28);
+      margin-top: 2px;
+    }
+    .flow-step-copy small {
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--cyan);
+    }
+    .flow-step-copy strong {
+      display: block;
+      font-size: 0.92rem;
+      letter-spacing: -0.01em;
+      margin-top: 3px;
+    }
+    .flow-step-copy span {
+      display: block;
+      font-size: 0.74rem;
+      color: var(--muted);
+      line-height: 1.45;
+      margin-top: 4px;
+    }
 
     /* ── Section title ── */
     .section-label {
@@ -239,17 +541,19 @@
 
     /* ── Glass card ── */
     .glass-card {
-      background: linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 100%);
-      backdrop-filter: blur(14px);
+      background: linear-gradient(135deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.03) 100%);
+      backdrop-filter: blur(18px) saturate(145%);
       -webkit-backdrop-filter: blur(14px);
       border: 1px solid var(--border);
       border-radius: var(--r);
       padding: 28px;
-      transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+      transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s, background 0.25s;
+      box-shadow: 0 16px 50px rgba(0,0,0,0.22);
     }
     .glass-card:hover {
-      border-color: rgba(0,212,255,0.22);
-      box-shadow: 0 12px 40px rgba(0,0,0,0.3), 0 0 30px rgba(0,212,255,0.06);
+      border-color: rgba(108,236,255,0.28);
+      background: linear-gradient(135deg, rgba(255,255,255,0.11) 0%, rgba(255,255,255,0.04) 100%);
+      box-shadow: 0 18px 54px rgba(0,0,0,0.32), 0 0 36px rgba(108,236,255,0.08);
       transform: translateY(-4px);
     }
 
@@ -269,34 +573,64 @@
     .prop-desc  { font-size: 0.875rem; color: var(--muted); line-height: 1.65; }
 
     /* ── How it works ── */
-    .how-grid {
-      display: grid;
-      grid-template-columns: repeat(4,1fr);
-      gap: 0;
+    .how-flow-wrap {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    .flow-layout {
       position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.25fr);
+      gap: 18px;
+      align-items: start;
     }
-    .how-grid::before {
-      content: "";
-      position: absolute;
-      top: 36px; left: 12%;
-      width: 76%; height: 1px;
-      background: linear-gradient(90deg, transparent, var(--cyan), var(--violet), transparent);
-      opacity: 0.3;
+    .flow-aside {
+      border-radius: 20px;
+      padding: 22px;
+      background: linear-gradient(180deg, rgba(7,12,28,0.62), rgba(7,12,28,0.42));
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+      position: relative;
+      z-index: 1;
     }
-    .how-step { text-align: center; padding: 0 16px; position: relative; }
-    .how-num {
-      width: 52px; height: 52px;
-      border-radius: 50%;
-      background: var(--grad);
-      background-size: 200%;
-      animation: gradientShift 6s ease-in-out infinite;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.1rem; font-weight: 800;
-      margin: 0 auto 18px;
-      box-shadow: 0 0 20px rgba(0,212,255,0.3);
+    .flow-aside h3 {
+      font-size: 1.08rem;
+      font-weight: 750;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+      line-height: 1.3;
     }
-    .how-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; }
-    .how-desc  { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+    .flow-aside p {
+      font-size: 0.84rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+    .flow-aside-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .flow-aside-metric {
+      border-radius: 14px;
+      padding: 12px 10px;
+      text-align: center;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .flow-aside-metric strong {
+      display: block;
+      font-size: 1rem;
+      color: var(--text);
+    }
+    .flow-aside-metric span {
+      display: block;
+      margin-top: 4px;
+      font-size: 0.69rem;
+      line-height: 1.35;
+      color: var(--muted);
+    }
 
     /* ── Compliance section ── */
     .compliance-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
@@ -354,13 +688,14 @@
     /* ── Features grid ── */
     .features-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; }
     .feature-card {
-      background: var(--bg-card);
+      background: linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
       border: 1px solid var(--border);
       border-radius: var(--r);
       padding: 24px;
-      transition: border-color 0.22s, transform 0.22s;
+      transition: border-color 0.22s, transform 0.22s, box-shadow 0.22s;
+      box-shadow: 0 16px 46px rgba(0,0,0,0.20);
     }
-    .feature-card:hover { border-color: rgba(0,212,255,0.2); transform: translateY(-3px); }
+    .feature-card:hover { border-color: rgba(108,236,255,0.22); transform: translateY(-3px); box-shadow: 0 18px 56px rgba(0,0,0,0.26), 0 0 24px rgba(108,236,255,0.06); }
     .feature-icon { font-size: 24px; margin-bottom: 14px; }
     .feature-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 7px; }
     .feature-desc  { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
@@ -413,9 +748,14 @@
       nav { padding: 14px 20px; }
       .nav-links { display: none; }
       section { padding: 70px 24px; }
+      .control-band { padding: 0 24px; margin-top: -10px; }
+      .control-band-grid { grid-template-columns: 1fr; }
+      .hero-inner { grid-template-columns: 1fr; }
+      .hero-copy { text-align: center; }
+      .hero-sub { margin: 0 auto 34px; }
+      .hero-ctas, .hero-scroll { justify-content: center; }
+      .flow-layout { grid-template-columns: 1fr; }
       .props-grid  { grid-template-columns: 1fr; }
-      .how-grid    { grid-template-columns: 1fr 1fr; }
-      .how-grid::before { display: none; }
       .compliance-grid { grid-template-columns: 1fr; }
       .features-grid   { grid-template-columns: 1fr 1fr; }
       .hero-ctas { flex-direction: column; align-items: center; }
@@ -424,7 +764,6 @@
     }
     @media (max-width: 600px) {
       .features-grid { grid-template-columns: 1fr; }
-      .how-grid      { grid-template-columns: 1fr; }
       .hero-title    { font-size: 2rem; }
     }
     @media (prefers-reduced-motion: reduce) {
@@ -437,14 +776,18 @@
 <!-- ── Navigation ──────────────────────────────────────────────────────── -->
 <nav>
   <div class="nav-brand" style="display:flex;align-items:center;gap:9px;">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 180" fill="none" width="28" height="25" style="filter:drop-shadow(0 0 6px rgba(0,212,255,0.5));flex-shrink:0" aria-hidden="true"><defs><linearGradient id="ng" x1="100" y1="0" x2="100" y2="180" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#7ee8ff"/><stop offset="40%" stop-color="#2ba8d4"/><stop offset="100%" stop-color="#0d2b5e"/></linearGradient><linearGradient id="nx" x1="100" y1="35" x2="100" y2="148" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#a0edff"/><stop offset="50%" stop-color="#2ba8d4"/><stop offset="100%" stop-color="#1040a0"/></linearGradient></defs><line x1="100" y1="2" x2="100" y2="28" stroke="url(#ng)" stroke-width="2.2" stroke-linecap="round"/><line x1="94" y1="12" x2="106" y2="12" stroke="url(#ng)" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="100" cy="28" rx="7" ry="3.5" stroke="url(#ng)" stroke-width="1.8"/><polyline points="14,148 14,60 29,60 29,148" stroke="url(#ng)" stroke-width="2.2" stroke-linejoin="round"/><polyline points="34,148 34,74 46,74 46,148" stroke="url(#ng)" stroke-width="2.2" stroke-linejoin="round"/><polyline points="51,148 51,88 62,88 62,148" stroke="url(#ng)" stroke-width="2.2" stroke-linejoin="round"/><polyline points="138,148 138,88 149,88 149,148" stroke="url(#ng)" stroke-width="2.2" stroke-linejoin="round"/><polyline points="154,148 154,74 166,74 166,148" stroke="url(#ng)" stroke-width="2.2" stroke-linejoin="round"/><polyline points="171,148 171,60 186,60 186,148" stroke="url(#ng)" stroke-width="2.2" stroke-linejoin="round"/><line x1="10" y1="148" x2="190" y2="148" stroke="url(#ng)" stroke-width="2" stroke-linecap="round"/><path d="M68,35L86,35L100,58L114,35L132,35L132,52L113,92L132,132L132,148L114,148L100,126L86,148L68,148L68,132L87,92L68,52Z" fill="url(#nx)" opacity="0.92"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="28" height="28" fill="none" role="img" aria-label="cityXai" style="filter:drop-shadow(0 0 6px rgba(0,212,255,0.45));flex-shrink:0;border-radius:6px"><defs><linearGradient id="lg-n" x1="64" y1="3" x2="64" y2="116" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#a8f0ff"/><stop offset="0.4" stop-color="#2ba8d4"/><stop offset="1" stop-color="#0a2a5e"/></linearGradient></defs><line x1="64" y1="3" x2="64" y2="20" stroke="url(#lg-n)" stroke-width="2.5" stroke-linecap="round"/><line x1="57" y1="20" x2="71" y2="20" stroke="url(#lg-n)" stroke-width="3" stroke-linecap="round"/><line x1="60" y1="26" x2="68" y2="26" stroke="url(#lg-n)" stroke-width="2" stroke-linecap="round"/><rect x="59" y="30" width="10" height="5" rx="1.5" fill="url(#lg-n)"/><rect x="6" y="50" width="11" height="66" stroke="url(#lg-n)" stroke-width="2.5" stroke-linejoin="round"/><rect x="21" y="35" width="13" height="81" stroke="url(#lg-n)" stroke-width="2.5" stroke-linejoin="round"/><rect x="94" y="35" width="13" height="81" stroke="url(#lg-n)" stroke-width="2.5" stroke-linejoin="round"/><rect x="111" y="50" width="11" height="66" stroke="url(#lg-n)" stroke-width="2.5" stroke-linejoin="round"/><line x1="36" y1="34" x2="97" y2="115" stroke="url(#lg-n)" stroke-width="7" stroke-linecap="round"/><line x1="92" y1="34" x2="31" y2="115" stroke="url(#lg-n)" stroke-width="7" stroke-linecap="round"/></svg>
     cityXai
   </div>
   <div class="nav-links">
-    <a href="#features">Features</a>
-    <a href="#compliance">Compliance</a>
-    <a href="#how">Funktionsweise</a>
-    <a class="btn-nav" href="https://localhost">Demo starten</a>
+    <a href="#features" data-i18n="navFeatures">Features</a>
+    <a href="#compliance" data-i18n="navCompliance">Compliance</a>
+    <a href="#how" data-i18n="navHow">Funktionsweise</a>
+    <a class="btn-nav" href="https://localhost" data-i18n="navDemo">Demo starten</a>
+    <div class="lang-switch">
+      <button type="button" class="active" data-lang="de">Deutsch</button>
+      <button type="button" data-lang="en">English</button>
+    </div>
   </div>
 </nav>
 
@@ -455,34 +798,92 @@
   <div class="hero-orb hero-orb-3"></div>
 
   <div class="hero-inner">
+    <div class="hero-copy">
     <div class="fade-in" style="display:flex;justify-content:center;margin-bottom:28px;">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 180" fill="none" width="96" height="86" style="filter:drop-shadow(0 0 28px rgba(0,212,255,0.55)) drop-shadow(0 0 60px rgba(26,122,181,0.3))" aria-label="cityXai"><defs><linearGradient id="hg" x1="100" y1="0" x2="100" y2="180" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#7ee8ff"/><stop offset="40%" stop-color="#2ba8d4"/><stop offset="100%" stop-color="#0d2b5e"/></linearGradient><linearGradient id="hx" x1="100" y1="35" x2="100" y2="148" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#a0edff"/><stop offset="50%" stop-color="#2ba8d4"/><stop offset="100%" stop-color="#1040a0"/></linearGradient></defs><line x1="100" y1="2" x2="100" y2="28" stroke="url(#hg)" stroke-width="2.2" stroke-linecap="round"/><line x1="94" y1="12" x2="106" y2="12" stroke="url(#hg)" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="100" cy="28" rx="7" ry="3.5" stroke="url(#hg)" stroke-width="1.8"/><polyline points="14,148 14,60 29,60 29,148" stroke="url(#hg)" stroke-width="2.2" stroke-linejoin="round"/><polyline points="34,148 34,74 46,74 46,148" stroke="url(#hg)" stroke-width="2.2" stroke-linejoin="round"/><polyline points="51,148 51,88 62,88 62,148" stroke="url(#hg)" stroke-width="2.2" stroke-linejoin="round"/><polyline points="138,148 138,88 149,88 149,148" stroke="url(#hg)" stroke-width="2.2" stroke-linejoin="round"/><polyline points="154,148 154,74 166,74 166,148" stroke="url(#hg)" stroke-width="2.2" stroke-linejoin="round"/><polyline points="171,148 171,60 186,60 186,148" stroke="url(#hg)" stroke-width="2.2" stroke-linejoin="round"/><line x1="10" y1="148" x2="190" y2="148" stroke="url(#hg)" stroke-width="2" stroke-linecap="round"/><path d="M68,35L86,35L100,58L114,35L132,35L132,52L113,92L132,132L132,148L114,148L100,126L86,148L68,148L68,132L87,92L68,52Z" fill="url(#hx)" opacity="0.92"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="120" height="120" fill="none" role="img" aria-label="cityXai" style="filter:drop-shadow(0 0 28px rgba(0,212,255,0.5)) drop-shadow(0 0 60px rgba(26,122,181,0.26));border-radius:18px"><defs><linearGradient id="lg-h" x1="64" y1="3" x2="64" y2="116" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#a8f0ff"/><stop offset="0.4" stop-color="#2ba8d4"/><stop offset="1" stop-color="#0a2a5e"/></linearGradient></defs><line x1="64" y1="3" x2="64" y2="20" stroke="url(#lg-h)" stroke-width="2.5" stroke-linecap="round"/><line x1="57" y1="20" x2="71" y2="20" stroke="url(#lg-h)" stroke-width="3" stroke-linecap="round"/><line x1="60" y1="26" x2="68" y2="26" stroke="url(#lg-h)" stroke-width="2" stroke-linecap="round"/><rect x="59" y="30" width="10" height="5" rx="1.5" fill="url(#lg-h)"/><rect x="6" y="50" width="11" height="66" stroke="url(#lg-h)" stroke-width="2.5" stroke-linejoin="round"/><rect x="21" y="35" width="13" height="81" stroke="url(#lg-h)" stroke-width="2.5" stroke-linejoin="round"/><rect x="94" y="35" width="13" height="81" stroke="url(#lg-h)" stroke-width="2.5" stroke-linejoin="round"/><rect x="111" y="50" width="11" height="66" stroke="url(#lg-h)" stroke-width="2.5" stroke-linejoin="round"/><line x1="36" y1="34" x2="97" y2="115" stroke="url(#lg-h)" stroke-width="7" stroke-linecap="round"/><line x1="92" y1="34" x2="31" y2="115" stroke="url(#lg-h)" stroke-width="7" stroke-linecap="round"/></svg>
     </div>
 
     <div class="hero-badge fade-in">
       <span class="hero-badge-dot"></span>
-      Lokal gehostet · DSGVO-konform · KI-Verordnung Art. 13
+      <span data-i18n="heroBadge">Lokal gehostet · DSGVO-konform · KI-Verordnung Art. 13</span>
     </div>
 
     <h1 class="hero-title fade-in-delay-1">
-      Souveräne KI<br />
-      für <span class="grad-text">deutsche Kommunen</span>
+      <span data-i18n="heroTitlePrefix">Souveräne KI</span><br />
+      <span data-i18n="heroTitleFor">für</span> <span class="grad-text" data-i18n="heroTitleHighlight">deutsche Kommunen</span>
     </h1>
 
-    <p class="hero-sub fade-in-delay-2">
+    <p class="hero-sub fade-in-delay-2" data-i18n="heroSub">
       Sichere, quellengestützte Verwaltungsintelligenz — lokal betrieben,
       vollständig kontrolliert. Keine Cloud-Abhängigkeit, keine Datenweitergabe.
     </p>
 
     <div class="hero-ctas fade-in-delay-3">
-      <a class="btn-primary" href="https://localhost">Zur Live-Demo</a>
-      <a class="btn-secondary" href="#how">Wie es funktioniert ↓</a>
+      <a class="btn-primary" href="https://localhost" data-i18n="heroPrimary">Zur Live-Demo</a>
+      <a class="btn-secondary" href="#how" data-i18n="heroSecondary">Wie es funktioniert ↓</a>
     </div>
 
-    <div class="hero-scroll fade-in-delay-4">
+    <div class="hero-scroll fade-in-delay-4" data-i18n="heroScroll">
       <div class="hero-scroll-line"></div>
       Hybrid RAG · Keycloak RBAC · Prometheus Monitoring
       <div class="hero-scroll-line"></div>
+    </div>
+    </div>
+
+    <div class="hero-side fade-in-delay-2">
+    <div class="hero-panel">
+        <div class="hero-panel-top">
+        <div class="hero-panel-title" data-i18n="heroPanelTitle">Live Stack</div>
+        <div class="hero-chip" data-i18n="heroPanelChip">Local-first</div>
+      </div>
+      <div class="hero-panel-grid">
+        <div class="hero-card">
+          <div class="hero-card-label" data-i18n="heroRuntimeLabel">Runtime</div>
+          <div class="hero-card-title" data-i18n="heroRuntimeTitle">Hybrid RAG, Keycloak RBAC, Grafana monitoring</div>
+          <div class="hero-card-desc" data-i18n="heroRuntimeDesc">A polished local AI stack for municipal workflows with grounded answers, auditability, and controlled data boundaries.</div>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <strong>100%</strong>
+            <span data-i18n="heroStat1">On-prem data path</span>
+          </div>
+          <div class="hero-stat">
+            <strong>0</strong>
+            <span data-i18n="heroStat2">External API calls</span>
+          </div>
+          <div class="hero-stat">
+            <strong>5</strong>
+            <span data-i18n="heroStat3">Access roles</span>
+          </div>
+        </div>
+        <div class="hero-card">
+          <div class="hero-card-label" data-i18n="heroFocusLabel">Demo Focus</div>
+          <div class="hero-card-title" data-i18n="heroFocusTitle">Sleek municipal AI without cloud compromise</div>
+          <div class="hero-card-desc" data-i18n="heroFocusDesc">Show upload, grounded chat, audit traceability, and observability in a single glassy operator experience.</div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Control Band ────────────────────────────────────────────────────── -->
+<div class="control-band">
+  <div class="control-band-grid">
+    <div class="control-card fade-in">
+      <div class="control-card-label" data-i18n="controlCard1Label">Discover</div>
+      <div class="control-card-title" data-i18n="controlCard1Title">See every municipal AI touchpoint</div>
+      <div class="control-card-desc" data-i18n="controlCard1Desc">Bring document ingest, staff copilots, citizen chat, audit traces, and monitoring into one visible operating layer.</div>
+    </div>
+    <div class="control-card fade-in-delay-1">
+      <div class="control-card-label" data-i18n="controlCard2Label">Control</div>
+      <div class="control-card-title" data-i18n="controlCard2Title">Apply governance where the workflow happens</div>
+      <div class="control-card-desc" data-i18n="controlCard2Desc">RBAC, source grounding, namespace isolation, and local inference are enforced in the runtime path rather than added as slideware.</div>
+    </div>
+    <div class="control-card fade-in-delay-2">
+      <div class="control-card-label" data-i18n="controlCard3Label">Prove</div>
+      <div class="control-card-title" data-i18n="controlCard3Title">Generate evidence for oversight and trust</div>
+      <div class="control-card-desc" data-i18n="controlCard3Desc">Hash-based audit records, observable services, and transparent UI notices make the system explainable to administrators, auditors, and citizens.</div>
     </div>
   </div>
 </div>
@@ -490,9 +891,9 @@
 <!-- ── Value Props ──────────────────────────────────────────────────────── -->
 <section>
   <div class="section-header" style="text-align:center; margin-left:auto; margin-right:auto;">
-    <div class="section-label">Warum cityXai</div>
-    <h2 class="section-title">Gebaut für Kommunen.<br/>Nicht für die Cloud.</h2>
-    <p class="section-sub" style="margin:0 auto;">
+    <div class="section-label" data-i18n="whyLabel">Warum cityXai</div>
+    <h2 class="section-title"><span data-i18n="whyTitle1">Gebaut für Kommunen.</span><br/><span data-i18n="whyTitle2">Nicht für die Cloud.</span></h2>
+    <p class="section-sub" style="margin:0 auto;" data-i18n="whySub">
       Deutsche Verwaltungen brauchen KI, die ihre Datenschutzanforderungen erfüllt —
       ohne Kompromisse bei Leistung und Benutzerfreundlichkeit.
     </p>
@@ -501,18 +902,18 @@
   <div class="props-grid">
     <div class="glass-card fade-in">
       <div class="prop-icon cyan">🏛️</div>
-      <div class="prop-title">Vollständige Datenhoheit</div>
-      <p class="prop-desc">Alle Daten, Modelle und Embeddings verbleiben in Ihrer Infrastruktur. Kein Byte verlässt Ihren Server.</p>
+      <div class="prop-title" data-i18n="prop1Title">Vollständige Datenhoheit</div>
+      <p class="prop-desc" data-i18n="prop1Desc">Alle Daten, Modelle und Embeddings verbleiben in Ihrer Infrastruktur. Kein Byte verlässt Ihren Server.</p>
     </div>
     <div class="glass-card fade-in-delay-1">
       <div class="prop-icon violet">⚖️</div>
-      <div class="prop-title">DSGVO &amp; KI-Verordnung</div>
-      <p class="prop-desc">Hash-basiertes Audit-Logging, rollenbasierte Zugriffskontrolle und transparente KI-Kennzeichnung nach Art. 13 AIAV.</p>
+      <div class="prop-title" data-i18n="prop2Title">DSGVO &amp; KI-Verordnung</div>
+      <p class="prop-desc" data-i18n="prop2Desc">Hash-basiertes Audit-Logging, rollenbasierte Zugriffskontrolle und transparente KI-Kennzeichnung nach Art. 13 AIAV.</p>
     </div>
     <div class="glass-card fade-in-delay-2">
       <div class="prop-icon green">⚡</div>
-      <div class="prop-title">Lokale Inferenz</div>
-      <p class="prop-desc">Ollama betreibt Sprachmodelle lokal. Schnelle Antwortzeiten ohne externe API-Abhängigkeiten oder Drittlandtransfer.</p>
+      <div class="prop-title" data-i18n="prop3Title">Lokale Inferenz</div>
+      <p class="prop-desc" data-i18n="prop3Desc">Ollama betreibt Sprachmodelle lokal. Schnelle Antwortzeiten ohne externe API-Abhängigkeiten oder Drittlandtransfer.</p>
     </div>
   </div>
 </section>
@@ -520,30 +921,70 @@
 <!-- ── How it works ─────────────────────────────────────────────────────── -->
 <section id="how" style="padding-top:60px;">
   <div class="section-header" style="text-align:center;">
-    <div class="section-label">Funktionsweise</div>
-    <h2 class="section-title">Von der Akte zur Antwort</h2>
+    <div class="section-label" data-i18n="howLabel">Funktionsweise</div>
+    <h2 class="section-title" data-i18n="howTitle">Von der Akte zur Antwort</h2>
   </div>
 
-  <div class="how-grid">
-    <div class="how-step fade-in">
-      <div class="how-num">1</div>
-      <div class="how-title">Dokumente hochladen</div>
-      <p class="how-desc">PDF, DOCX, XLSX, PPTX — Ihre Akten werden konvertiert und kategorisiert.</p>
-    </div>
-    <div class="how-step fade-in-delay-1">
-      <div class="how-num">2</div>
-      <div class="how-title">Vektoren indexieren</div>
-      <p class="how-desc">Semantische Embeddings werden lokal mit Ollama erzeugt und in ChromaDB gespeichert.</p>
-    </div>
-    <div class="how-step fade-in-delay-2">
-      <div class="how-num">3</div>
-      <div class="how-title">Hybrid-RAG Abfrage</div>
-      <p class="how-desc">Dense + sparse Retrieval mit Reciprocal Rank Fusion liefert quellengestützte Antworten.</p>
-    </div>
-    <div class="how-step fade-in-delay-3">
-      <div class="how-num">4</div>
-      <div class="how-title">Audit &amp; Compliance</div>
-      <p class="how-desc">Jede Anfrage wird hash-basiert protokolliert — nachvollziehbar, filterbar, exportierbar.</p>
+  <div class="how-flow-wrap">
+    <div class="flow-box fade-in">
+      <div class="hero-panel-top" style="margin-bottom: 12px; position: relative; z-index: 1;">
+        <div class="hero-panel-title" data-i18n="flowBoxTitle">Data Flow</div>
+        <div class="hero-chip" data-i18n="flowBoxChip">4 steps</div>
+      </div>
+      <div class="flow-layout">
+        <div class="flow-aside">
+          <h3 data-i18n="flowIntroTitle">From municipal records to governed answers</h3>
+          <p data-i18n="flowIntroDesc">The system turns local documents into source-grounded responses through a compact runtime path that remains observable, permission-aware, and auditable.</p>
+          <div class="flow-aside-metrics">
+            <div class="flow-aside-metric">
+              <strong>4</strong>
+              <span data-i18n="flowMetric1">governed steps</span>
+            </div>
+            <div class="flow-aside-metric">
+              <strong>0</strong>
+              <span data-i18n="flowMetric2">external calls</span>
+            </div>
+            <div class="flow-aside-metric">
+              <strong>100%</strong>
+              <span data-i18n="flowMetric3">local data path</span>
+            </div>
+          </div>
+        </div>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">1</div>
+            <div class="flow-step-copy">
+              <small data-i18n="flowNode1Label">Input</small>
+              <strong data-i18n="flowNode1Title">Municipal files</strong>
+              <span data-i18n="flowNode1Desc">PDF, DOCX, XLSX, plans, statutes</span>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">2</div>
+            <div class="flow-step-copy">
+              <small data-i18n="flowNode2Label">Ingest</small>
+              <strong data-i18n="flowNode2Title">Normalization</strong>
+              <span data-i18n="flowNode2Desc">Chunking, metadata, markdown preview</span>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">3</div>
+            <div class="flow-step-copy">
+              <small data-i18n="flowNode3Label">Retrieval</small>
+              <strong data-i18n="flowNode3Title">Hybrid RAG</strong>
+              <span data-i18n="flowNode3Desc">Embeddings, ranking, grounded context</span>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">4</div>
+            <div class="flow-step-copy">
+              <small data-i18n="flowNode4Label">Governance</small>
+              <strong data-i18n="flowNode4Title">Audit and roles</strong>
+              <span data-i18n="flowNode4Desc">Keycloak RBAC, hashed traces, visibility</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -552,9 +993,9 @@
 <section id="compliance">
   <div class="compliance-grid">
     <div>
-      <div class="section-label">Compliance &amp; Sicherheit</div>
-      <h2 class="section-title">Gebaut für<br/><span class="grad-text">regulierte Umgebungen</span></h2>
-      <p class="section-sub" style="margin-bottom:32px;">
+      <div class="section-label" data-i18n="complianceLabel">Compliance &amp; Sicherheit</div>
+      <h2 class="section-title"><span data-i18n="complianceTitle1">Gebaut für</span><br/><span class="grad-text" data-i18n="complianceTitle2">regulierte Umgebungen</span></h2>
+      <p class="section-sub" style="margin-bottom:32px;" data-i18n="complianceSub">
         Jede Architekturentscheidung orientiert sich an DSGVO, EU-KI-Verordnung und dem Prinzip der Datensparsamkeit.
       </p>
 
@@ -562,36 +1003,36 @@
         <div class="compliance-item">
           <div class="compliance-check">✓</div>
           <div>
-            <div class="compliance-item-title">Lokale Verarbeitung</div>
-            <div class="compliance-item-sub">DSGVO Art. 5 &amp; 24 — Datensouveränität durch On-Premise-Betrieb</div>
+            <div class="compliance-item-title" data-i18n="complianceItem1Title">Lokale Verarbeitung</div>
+            <div class="compliance-item-sub" data-i18n="complianceItem1Sub">DSGVO Art. 5 &amp; 24 — Datensouveränität durch On-Premise-Betrieb</div>
           </div>
         </div>
         <div class="compliance-item">
           <div class="compliance-check">✓</div>
           <div>
-            <div class="compliance-item-title">Namespace-Isolation</div>
-            <div class="compliance-item-sub">DSGVO Art. 32 — Mandantentrennung pro Kommune</div>
+            <div class="compliance-item-title" data-i18n="complianceItem2Title">Namespace-Isolation</div>
+            <div class="compliance-item-sub" data-i18n="complianceItem2Sub">DSGVO Art. 32 — Mandantentrennung pro Kommune</div>
           </div>
         </div>
         <div class="compliance-item">
           <div class="compliance-check">✓</div>
           <div>
-            <div class="compliance-item-title">Rollenbasierte Zugriffskontrolle</div>
-            <div class="compliance-item-sub">DSGVO Art. 25 — Privacy by Design via Keycloak RBAC</div>
+            <div class="compliance-item-title" data-i18n="complianceItem3Title">Rollenbasierte Zugriffskontrolle</div>
+            <div class="compliance-item-sub" data-i18n="complianceItem3Sub">DSGVO Art. 25 — Privacy by Design via Keycloak RBAC</div>
           </div>
         </div>
         <div class="compliance-item">
           <div class="compliance-check">✓</div>
           <div>
-            <div class="compliance-item-title">Hash-basiertes Audit-Log</div>
-            <div class="compliance-item-sub">KI-Verordnung Art. 12 — Nachvollziehbarkeit ohne PII-Speicherung</div>
+            <div class="compliance-item-title" data-i18n="complianceItem4Title">Hash-basiertes Audit-Log</div>
+            <div class="compliance-item-sub" data-i18n="complianceItem4Sub">KI-Verordnung Art. 12 — Nachvollziehbarkeit ohne PII-Speicherung</div>
           </div>
         </div>
         <div class="compliance-item">
           <div class="compliance-check">✓</div>
           <div>
-            <div class="compliance-item-title">KI-Transparenz-Footer</div>
-            <div class="compliance-item-sub">KI-Verordnung Transparenzpflichten — automatisierter Hinweis bei Bürgeranfragen</div>
+            <div class="compliance-item-title" data-i18n="complianceItem5Title">KI-Transparenz-Footer</div>
+            <div class="compliance-item-sub" data-i18n="complianceItem5Sub">KI-Verordnung Transparenzpflichten — automatisierter Hinweis bei Bürgeranfragen</div>
           </div>
         </div>
       </div>
@@ -622,19 +1063,19 @@
       <div style="margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
         <div class="glass-card" style="text-align:center; padding:20px 16px;">
           <div style="font-size:1.6rem; font-weight:800; color:var(--cyan);">100%</div>
-          <div style="font-size:0.78rem; color:var(--muted); margin-top:4px;">Lokale Verarbeitung</div>
+          <div style="font-size:0.78rem; color:var(--muted); margin-top:4px;" data-i18n="complianceStat1">Lokale Verarbeitung</div>
         </div>
         <div class="glass-card" style="text-align:center; padding:20px 16px;">
           <div style="font-size:1.6rem; font-weight:800; color:var(--success);">0</div>
-          <div style="font-size:0.78rem; color:var(--muted); margin-top:4px;">Externe API-Aufrufe</div>
+          <div style="font-size:0.78rem; color:var(--muted); margin-top:4px;" data-i18n="complianceStat2">Externe API-Aufrufe</div>
         </div>
         <div class="glass-card" style="text-align:center; padding:20px 16px;">
           <div style="font-size:1.6rem; font-weight:800; color:#6dd5fa;">5</div>
-          <div style="font-size:0.78rem; color:var(--muted); margin-top:4px;">Benutzerrollen</div>
+          <div style="font-size:0.78rem; color:var(--muted); margin-top:4px;" data-i18n="complianceStat3">Benutzerrollen</div>
         </div>
         <div class="glass-card" style="text-align:center; padding:20px 16px;">
           <div style="font-size:1.6rem; font-weight:800; color:var(--warning);">DSGVO</div>
-          <div style="font-size:0.78rem; color:var(--muted); margin-top:4px;">Art. 5, 24, 25, 32</div>
+          <div style="font-size:0.78rem; color:var(--muted); margin-top:4px;" data-i18n="complianceStat4">Art. 5, 24, 25, 32</div>
         </div>
       </div>
     </div>
@@ -644,40 +1085,40 @@
 <!-- ── Features ─────────────────────────────────────────────────────────── -->
 <section id="features">
   <div class="section-header" style="text-align:center;">
-    <div class="section-label">Features</div>
-    <h2 class="section-title">Alles was eine<br/>Kommunalverwaltung braucht</h2>
+    <div class="section-label" data-i18n="featuresLabel">Features</div>
+    <h2 class="section-title"><span data-i18n="featuresTitle1">Alles was eine</span><br/><span data-i18n="featuresTitle2">Kommunalverwaltung braucht</span></h2>
   </div>
 
   <div class="features-grid">
     <div class="feature-card fade-in">
       <div class="feature-icon">📊</div>
-      <div class="feature-title">Dashboard &amp; Monitoring</div>
-      <p class="feature-desc">Echtzeit-Metriken zu Dokumenten, Anfragen, Latenz und Speicher — visualisiert in Grafana.</p>
+      <div class="feature-title" data-i18n="feature1Title">Dashboard &amp; Monitoring</div>
+      <p class="feature-desc" data-i18n="feature1Desc">Echtzeit-Metriken zu Dokumenten, Anfragen, Latenz und Speicher — visualisiert in Grafana.</p>
     </div>
     <div class="feature-card fade-in-delay-1">
       <div class="feature-icon">💬</div>
-      <div class="feature-title">Hybrid RAG Chat</div>
-      <p class="feature-desc">Dense + sparse Retrieval mit Reranking und quellengestützten Antworten inkl. Konfidenz-Score.</p>
+      <div class="feature-title" data-i18n="feature2Title">Hybrid RAG Chat</div>
+      <p class="feature-desc" data-i18n="feature2Desc">Dense + sparse Retrieval mit Reranking und quellengestützten Antworten inkl. Konfidenz-Score.</p>
     </div>
     <div class="feature-card fade-in-delay-2">
       <div class="feature-icon">📁</div>
-      <div class="feature-title">Dokumentverwaltung</div>
-      <p class="feature-desc">Upload und Verarbeitung von PDF, DOCX, XLSX, PPTX mit Live-Statusverfolgung.</p>
+      <div class="feature-title" data-i18n="feature3Title">Dokumentverwaltung</div>
+      <p class="feature-desc" data-i18n="feature3Desc">Upload und Verarbeitung von PDF, DOCX, XLSX, PPTX mit Live-Statusverfolgung.</p>
     </div>
     <div class="feature-card fade-in-delay-3">
       <div class="feature-icon">🛡️</div>
-      <div class="feature-title">Audit &amp; Compliance</div>
-      <p class="feature-desc">Filterbare, exportierbare Protokolle mit SHA-256-Hashing — KI-Verordnung konform.</p>
+      <div class="feature-title" data-i18n="feature4Title">Audit &amp; Compliance</div>
+      <p class="feature-desc" data-i18n="feature4Desc">Filterbare, exportierbare Protokolle mit SHA-256-Hashing — KI-Verordnung konform.</p>
     </div>
     <div class="feature-card fade-in-delay-4">
       <div class="feature-icon">👥</div>
-      <div class="feature-title">Benutzerverwaltung</div>
-      <p class="feature-desc">Keycloak-gestützte RBAC mit 5 Rollen: Bürger, Sachbearbeiter, Dokumentenadmin, Admin, Revisor.</p>
+      <div class="feature-title" data-i18n="feature5Title">Benutzerverwaltung</div>
+      <p class="feature-desc" data-i18n="feature5Desc">Keycloak-gestützte RBAC mit 5 Rollen: Bürger, Sachbearbeiter, Dokumentenadmin, Admin, Revisor.</p>
     </div>
     <div class="feature-card fade-in">
       <div class="feature-icon">🔌</div>
-      <div class="feature-title">Bürgerchat-Widget</div>
-      <p class="feature-desc">Einbettbarer Chat für kommunale Websites — zero externe Aufrufe, KI-Hinweis inklusive.</p>
+      <div class="feature-title" data-i18n="feature6Title">Bürgerchat-Widget</div>
+      <p class="feature-desc" data-i18n="feature6Desc">Einbettbarer Chat für kommunale Websites — zero externe Aufrufe, KI-Hinweis inklusive.</p>
     </div>
   </div>
 </section>
@@ -687,17 +1128,17 @@
   <div class="cta-bg"></div>
   <div class="cta-inner">
     <div class="badges-row">
-      <span class="pill-badge active">DSGVO-konform</span>
-      <span class="pill-badge active">KI-Verordnung Art. 12 &amp; 13</span>
-      <span class="pill-badge">On-Premise</span>
-      <span class="pill-badge">Open Source</span>
-      <span class="pill-badge">Docker</span>
+      <span class="pill-badge active" data-i18n="ctaBadge1">DSGVO-konform</span>
+      <span class="pill-badge active" data-i18n="ctaBadge2">KI-Verordnung Art. 12 &amp; 13</span>
+      <span class="pill-badge active" data-i18n="ctaBadge3">On-Premise</span>
+      <span class="pill-badge active" data-i18n="ctaBadge4">Open Source</span>
+      <span class="pill-badge active" data-i18n="ctaBadge5">Docker</span>
     </div>
-    <h2 class="cta-title">Bereit für souveräne<br /><span class="grad-text">Kommunen-KI?</span></h2>
-    <p class="cta-sub">Starten Sie die Demo in unter 5 Minuten auf Ihrer eigenen Infrastruktur.</p>
+    <h2 class="cta-title"><span data-i18n="ctaTitle1">Bereit für souveräne</span><br /><span class="grad-text" data-i18n="ctaTitle2">Kommunen-KI?</span></h2>
+    <p class="cta-sub" data-i18n="ctaSub">Starten Sie die Demo in unter 5 Minuten auf Ihrer eigenen Infrastruktur.</p>
     <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
-      <a class="btn-primary" href="https://localhost">Live-Demo starten</a>
-      <a class="btn-secondary" href="https://github.com/joyat/cityXai">GitHub ansehen</a>
+      <a class="btn-primary" href="https://localhost" data-i18n="ctaPrimary">Live-Demo starten</a>
+      <a class="btn-secondary" href="https://github.com/joyat/cityXai" data-i18n="ctaSecondary">GitHub ansehen</a>
     </div>
   </div>
 </div>
@@ -706,21 +1147,293 @@
 <footer>
   <div>
     <span style="display:inline-flex;align-items:center;gap:8px;color:var(--text);font-weight:600;">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 180" fill="none" width="22" height="20" style="filter:drop-shadow(0 0 4px rgba(0,212,255,0.4));flex-shrink:0" aria-hidden="true"><defs><linearGradient id="fg" x1="100" y1="0" x2="100" y2="180" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#7ee8ff"/><stop offset="40%" stop-color="#2ba8d4"/><stop offset="100%" stop-color="#0d2b5e"/></linearGradient><linearGradient id="fx" x1="100" y1="35" x2="100" y2="148" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#a0edff"/><stop offset="50%" stop-color="#2ba8d4"/><stop offset="100%" stop-color="#1040a0"/></linearGradient></defs><line x1="100" y1="2" x2="100" y2="28" stroke="url(#fg)" stroke-width="2.2" stroke-linecap="round"/><line x1="94" y1="12" x2="106" y2="12" stroke="url(#fg)" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="100" cy="28" rx="7" ry="3.5" stroke="url(#fg)" stroke-width="1.8"/><polyline points="14,148 14,60 29,60 29,148" stroke="url(#fg)" stroke-width="2.2" stroke-linejoin="round"/><polyline points="34,148 34,74 46,74 46,148" stroke="url(#fg)" stroke-width="2.2" stroke-linejoin="round"/><polyline points="51,148 51,88 62,88 62,148" stroke="url(#fg)" stroke-width="2.2" stroke-linejoin="round"/><polyline points="138,148 138,88 149,88 149,148" stroke="url(#fg)" stroke-width="2.2" stroke-linejoin="round"/><polyline points="154,148 154,74 166,74 166,148" stroke="url(#fg)" stroke-width="2.2" stroke-linejoin="round"/><polyline points="171,148 171,60 186,60 186,148" stroke="url(#fg)" stroke-width="2.2" stroke-linejoin="round"/><line x1="10" y1="148" x2="190" y2="148" stroke="url(#fg)" stroke-width="2" stroke-linecap="round"/><path d="M68,35L86,35L100,58L114,35L132,35L132,52L113,92L132,132L132,148L114,148L100,126L86,148L68,148L68,132L87,92L68,52Z" fill="url(#fx)" opacity="0.92"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="22" height="22" fill="none" role="img" aria-label="cityXai" style="filter:drop-shadow(0 0 4px rgba(0,212,255,0.35));flex-shrink:0;border-radius:5px"><defs><linearGradient id="lg-f" x1="64" y1="3" x2="64" y2="116" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#a8f0ff"/><stop offset="0.4" stop-color="#2ba8d4"/><stop offset="1" stop-color="#0a2a5e"/></linearGradient></defs><line x1="64" y1="3" x2="64" y2="20" stroke="url(#lg-f)" stroke-width="2.5" stroke-linecap="round"/><line x1="57" y1="20" x2="71" y2="20" stroke="url(#lg-f)" stroke-width="3" stroke-linecap="round"/><line x1="60" y1="26" x2="68" y2="26" stroke="url(#lg-f)" stroke-width="2" stroke-linecap="round"/><rect x="59" y="30" width="10" height="5" rx="1.5" fill="url(#lg-f)"/><rect x="6" y="50" width="11" height="66" stroke="url(#lg-f)" stroke-width="2.5" stroke-linejoin="round"/><rect x="21" y="35" width="13" height="81" stroke="url(#lg-f)" stroke-width="2.5" stroke-linejoin="round"/><rect x="94" y="35" width="13" height="81" stroke="url(#lg-f)" stroke-width="2.5" stroke-linejoin="round"/><rect x="111" y="50" width="11" height="66" stroke="url(#lg-f)" stroke-width="2.5" stroke-linejoin="round"/><line x1="36" y1="34" x2="97" y2="115" stroke="url(#lg-f)" stroke-width="7" stroke-linecap="round"/><line x1="92" y1="34" x2="31" y2="115" stroke="url(#lg-f)" stroke-width="7" stroke-linecap="round"/></svg>
       cityXai
     </span>
-    &nbsp;— Souveräne kommunale KI-Plattform
+    &nbsp;— <span data-i18n="footerTagline">Souveräne kommunale KI-Plattform</span>
   </div>
   <div class="footer-links">
-    <a href="#">Impressum</a>
-    <a href="#">Datenschutz</a>
-    <a href="#">Kontakt</a>
+    <a href="#" data-i18n="footerLegal">Impressum</a>
+    <a href="#" data-i18n="footerPrivacy">Datenschutz</a>
+    <a href="#" data-i18n="footerContact">Kontakt</a>
     <a href="https://github.com/joyat/cityXai">GitHub</a>
   </div>
-  <div>© 2026 cityXai. Alle Rechte vorbehalten.</div>
+  <div data-i18n="footerCopy">© 2026 cityXai. Alle Rechte vorbehalten.</div>
 </footer>
 
 <script>
+  const translations = {
+    de: {
+      pageTitle: "cityXai — Souveräne KI für deutsche Kommunen",
+      navFeatures: "Features",
+      navCompliance: "Compliance",
+      navHow: "Funktionsweise",
+      navDemo: "Demo starten",
+      heroBadge: "Lokal gehostet · DSGVO-konform · KI-Verordnung Art. 13",
+      heroTitlePrefix: "Souveräne KI",
+      heroTitleFor: "für",
+      heroTitleHighlight: "deutsche Kommunen",
+      heroSub: "Sichere, quellengestützte Verwaltungsintelligenz — lokal betrieben, vollständig kontrolliert. Keine Cloud-Abhängigkeit, keine Datenweitergabe.",
+      heroPrimary: "Zur Live-Demo",
+      heroSecondary: "Wie es funktioniert ↓",
+      heroScroll: "Hybrid RAG · Keycloak RBAC · Prometheus Monitoring",
+      heroPanelTitle: "Live Stack",
+      heroPanelChip: "Lokal zuerst",
+      heroRuntimeLabel: "Laufzeit",
+      heroRuntimeTitle: "Hybrid RAG, Keycloak RBAC, Grafana-Monitoring",
+      heroRuntimeDesc: "Ein lokal betriebener KI-Stack für kommunale Workflows mit quellengestützten Antworten, Auditierbarkeit und klaren Datengrenzen.",
+      flowBoxTitle: "Datenfluss",
+      flowBoxChip: "4 Schritte",
+      flowIntroTitle: "Von kommunalen Akten zu gesteuerten Antworten",
+      flowIntroDesc: "Das System verwandelt lokale Dokumente in quellengestützte Antworten über einen kompakten Laufzeitpfad, der beobachtbar, rollenbasiert und auditierbar bleibt.",
+      flowMetric1: "gesteuerte Schritte",
+      flowMetric2: "externe Aufrufe",
+      flowMetric3: "lokaler Datenpfad",
+      flowNode1Label: "Input",
+      flowNode1Title: "Kommunale Akten",
+      flowNode1Desc: "PDF, DOCX, XLSX, Pläne, Satzungen",
+      flowNode2Label: "Ingest",
+      flowNode2Title: "Normalisierung",
+      flowNode2Desc: "Chunking, Metadaten, Markdown-Vorschau",
+      flowNode3Label: "Retrieval",
+      flowNode3Title: "Hybrid RAG",
+      flowNode3Desc: "Embeddings, Ranking, quellengestützter Kontext",
+      flowNode4Label: "Governance",
+      flowNode4Title: "Audit und Rollen",
+      flowNode4Desc: "Keycloak RBAC, Hash-Logs, Sichtbarkeit",
+      heroStat1: "On-Prem Datenpfad",
+      heroStat2: "Externe API-Aufrufe",
+      heroStat3: "Zugriffsrollen",
+      heroFocusLabel: "Demo-Fokus",
+      heroFocusTitle: "Smarte Kommunen-KI ohne Cloud-Kompromisse",
+      heroFocusDesc: "Zeigen Sie Upload, quellengestützten Chat, Audit-Nachvollziehbarkeit und Monitoring in einer eleganten Operator-Oberfläche.",
+      controlCard1Label: "Sichtbarkeit",
+      controlCard1Title: "Jeden kommunalen KI-Berührungspunkt sehen",
+      controlCard1Desc: "Dokumenten-Ingest, Fachchat, Bürgerchat, Audit-Spuren und Monitoring laufen in einer sichtbaren Betriebsoberfläche zusammen.",
+      controlCard2Label: "Steuerung",
+      controlCard2Title: "Governance dort anwenden, wo der Workflow läuft",
+      controlCard2Desc: "RBAC, Quellenbezug, Namespace-Isolation und lokale Inferenz werden im Laufzeitpfad durchgesetzt und nicht nur auf Folien behauptet.",
+      controlCard3Label: "Nachweis",
+      controlCard3Title: "Belastbare Evidenz für Aufsicht und Vertrauen erzeugen",
+      controlCard3Desc: "Hash-basierte Auditdaten, beobachtbare Services und klare KI-Hinweise machen das System für Verwaltung, Revision und Bürger nachvollziehbar.",
+      whyLabel: "Warum cityXai",
+      whyTitle1: "Gebaut für Kommunen.",
+      whyTitle2: "Nicht für die Cloud.",
+      whySub: "Deutsche Verwaltungen brauchen KI, die ihre Datenschutzanforderungen erfüllt — ohne Kompromisse bei Leistung und Benutzerfreundlichkeit.",
+      prop1Title: "Vollständige Datenhoheit",
+      prop1Desc: "Alle Daten, Modelle und Embeddings verbleiben in Ihrer Infrastruktur. Kein Byte verlässt Ihren Server.",
+      prop2Title: "DSGVO & KI-Verordnung",
+      prop2Desc: "Hash-basiertes Audit-Logging, rollenbasierte Zugriffskontrolle und transparente KI-Kennzeichnung nach Art. 13 AIAV.",
+      prop3Title: "Lokale Inferenz",
+      prop3Desc: "Ollama betreibt Sprachmodelle lokal. Schnelle Antwortzeiten ohne externe API-Abhängigkeiten oder Drittlandtransfer.",
+      howLabel: "Funktionsweise",
+      howTitle: "Von der Akte zur Antwort",
+      how1Title: "Dokumente hochladen",
+      how1Desc: "PDF, DOCX, XLSX, PPTX — Ihre Akten werden konvertiert und kategorisiert.",
+      how2Title: "Vektoren indexieren",
+      how2Desc: "Semantische Embeddings werden lokal mit Ollama erzeugt und in ChromaDB gespeichert.",
+      how3Title: "Hybrid-RAG Abfrage",
+      how3Desc: "Dense + sparse Retrieval mit Reciprocal Rank Fusion liefert quellengestützte Antworten.",
+      how4Title: "Audit & Compliance",
+      how4Desc: "Jede Anfrage wird hash-basiert protokolliert — nachvollziehbar, filterbar, exportierbar.",
+      complianceLabel: "Compliance & Sicherheit",
+      complianceTitle1: "Gebaut für",
+      complianceTitle2: "regulierte Umgebungen",
+      complianceSub: "Jede Architekturentscheidung orientiert sich an DSGVO, EU-KI-Verordnung und dem Prinzip der Datensparsamkeit.",
+      complianceItem1Title: "Lokale Verarbeitung",
+      complianceItem1Sub: "DSGVO Art. 5 & 24 — Datensouveränität durch On-Premise-Betrieb",
+      complianceItem2Title: "Namespace-Isolation",
+      complianceItem2Sub: "DSGVO Art. 32 — Mandantentrennung pro Kommune",
+      complianceItem3Title: "Rollenbasierte Zugriffskontrolle",
+      complianceItem3Sub: "DSGVO Art. 25 — Privacy by Design via Keycloak RBAC",
+      complianceItem4Title: "Hash-basiertes Audit-Log",
+      complianceItem4Sub: "KI-Verordnung Art. 12 — Nachvollziehbarkeit ohne PII-Speicherung",
+      complianceItem5Title: "KI-Transparenz-Footer",
+      complianceItem5Sub: "KI-Verordnung Transparenzpflichten — automatisierter Hinweis bei Bürgeranfragen",
+      complianceStat1: "Lokale Verarbeitung",
+      complianceStat2: "Externe API-Aufrufe",
+      complianceStat3: "Benutzerrollen",
+      complianceStat4: "Art. 5, 24, 25, 32",
+      featuresLabel: "Features",
+      featuresTitle1: "Alles was eine",
+      featuresTitle2: "Kommunalverwaltung braucht",
+      feature1Title: "Dashboard & Monitoring",
+      feature1Desc: "Echtzeit-Metriken zu Dokumenten, Anfragen, Latenz und Speicher — visualisiert in Grafana.",
+      feature2Title: "Hybrid RAG Chat",
+      feature2Desc: "Dense + sparse Retrieval mit Reranking und quellengestützten Antworten inkl. Konfidenz-Score.",
+      feature3Title: "Dokumentverwaltung",
+      feature3Desc: "Upload und Verarbeitung von PDF, DOCX, XLSX, PPTX mit Live-Statusverfolgung.",
+      feature4Title: "Audit & Compliance",
+      feature4Desc: "Filterbare, exportierbare Protokolle mit SHA-256-Hashing — KI-Verordnung konform.",
+      feature5Title: "Benutzerverwaltung",
+      feature5Desc: "Keycloak-gestützte RBAC mit 5 Rollen: Bürger, Sachbearbeiter, Dokumentenadmin, Admin, Revisor.",
+      feature6Title: "Bürgerchat-Widget",
+      feature6Desc: "Einbettbarer Chat für kommunale Websites — zero externe Aufrufe, KI-Hinweis inklusive.",
+      ctaBadge1: "DSGVO-konform",
+      ctaBadge2: "KI-Verordnung Art. 12 & 13",
+      ctaBadge3: "On-Premise",
+      ctaBadge4: "Open Source",
+      ctaBadge5: "Docker",
+      ctaTitle1: "Bereit für souveräne",
+      ctaTitle2: "Kommunen-KI?",
+      ctaSub: "Starten Sie die Demo in unter 5 Minuten auf Ihrer eigenen Infrastruktur.",
+      ctaPrimary: "Live-Demo starten",
+      ctaSecondary: "GitHub ansehen",
+      footerTagline: "Souveräne kommunale KI-Plattform",
+      footerLegal: "Impressum",
+      footerPrivacy: "Datenschutz",
+      footerContact: "Kontakt",
+      footerCopy: "© 2026 cityXai. Alle Rechte vorbehalten."
+    },
+    en: {
+      pageTitle: "cityXai — Sovereign AI for German municipalities",
+      navFeatures: "Features",
+      navCompliance: "Compliance",
+      navHow: "How it works",
+      navDemo: "Launch demo",
+      heroBadge: "Locally hosted · GDPR-aligned · AI Act Art. 13",
+      heroTitlePrefix: "Sovereign AI",
+      heroTitleFor: "for",
+      heroTitleHighlight: "German municipalities",
+      heroSub: "Secure, source-grounded administrative intelligence — locally operated and fully controlled. No cloud dependency, no external data transfer.",
+      heroPrimary: "Open live demo",
+      heroSecondary: "How it works ↓",
+      heroScroll: "Hybrid RAG · Keycloak RBAC · Prometheus Monitoring",
+      heroPanelTitle: "Live Stack",
+      heroPanelChip: "Local-first",
+      heroRuntimeLabel: "Runtime",
+      heroRuntimeTitle: "Hybrid RAG, Keycloak RBAC, Grafana monitoring",
+      heroRuntimeDesc: "A locally operated AI stack for municipal workflows with grounded answers, auditability, and clear data boundaries.",
+      flowBoxTitle: "Data Flow",
+      flowBoxChip: "4 steps",
+      flowIntroTitle: "From municipal records to governed answers",
+      flowIntroDesc: "The system turns local documents into source-grounded responses through a compact runtime path that remains observable, permission-aware, and auditable.",
+      flowMetric1: "governed steps",
+      flowMetric2: "external calls",
+      flowMetric3: "local data path",
+      flowNode1Label: "Input",
+      flowNode1Title: "Municipal files",
+      flowNode1Desc: "PDF, DOCX, XLSX, plans, statutes",
+      flowNode2Label: "Ingest",
+      flowNode2Title: "Normalization",
+      flowNode2Desc: "Chunking, metadata, markdown preview",
+      flowNode3Label: "Retrieval",
+      flowNode3Title: "Hybrid RAG",
+      flowNode3Desc: "Embeddings, ranking, grounded context",
+      flowNode4Label: "Governance",
+      flowNode4Title: "Audit and roles",
+      flowNode4Desc: "Keycloak RBAC, hashed traces, visibility",
+      heroStat1: "On-prem data path",
+      heroStat2: "External API calls",
+      heroStat3: "Access roles",
+      heroFocusLabel: "Demo Focus",
+      heroFocusTitle: "Sleek municipal AI without cloud compromise",
+      heroFocusDesc: "Show upload, grounded chat, audit traceability, and observability in a single glassy operator experience.",
+      controlCard1Label: "Discover",
+      controlCard1Title: "See every municipal AI touchpoint",
+      controlCard1Desc: "Bring document ingest, staff copilots, citizen chat, audit traces, and monitoring into one visible operating layer.",
+      controlCard2Label: "Control",
+      controlCard2Title: "Apply governance where the workflow happens",
+      controlCard2Desc: "RBAC, source grounding, namespace isolation, and local inference are enforced in the runtime path instead of being promised in slides.",
+      controlCard3Label: "Prove",
+      controlCard3Title: "Generate evidence for oversight and trust",
+      controlCard3Desc: "Hash-based audit records, observable services, and transparent UI notices make the system explainable to administrators, auditors, and citizens.",
+      whyLabel: "Why cityXai",
+      whyTitle1: "Built for municipalities.",
+      whyTitle2: "Not for the cloud.",
+      whySub: "German public administrations need AI that meets their privacy obligations without sacrificing usability or performance.",
+      prop1Title: "Full data sovereignty",
+      prop1Desc: "All data, models, and embeddings stay inside your own infrastructure. Not a single byte leaves your server.",
+      prop2Title: "GDPR & AI Act",
+      prop2Desc: "Hash-based audit logging, role-based access control, and transparent AI notices aligned with Article 13 requirements.",
+      prop3Title: "Local inference",
+      prop3Desc: "Ollama runs language models locally for fast response times without external API dependencies or third-country transfer.",
+      howLabel: "How it works",
+      howTitle: "From file to answer",
+      how1Title: "Upload documents",
+      how1Desc: "PDF, DOCX, XLSX, PPTX — your files are converted and categorized.",
+      how2Title: "Index vectors",
+      how2Desc: "Semantic embeddings are generated locally with Ollama and stored in ChromaDB.",
+      how3Title: "Hybrid RAG query",
+      how3Desc: "Dense and sparse retrieval with reciprocal rank fusion produces source-grounded answers.",
+      how4Title: "Audit & compliance",
+      how4Desc: "Every query is logged with hashes only — traceable, filterable, and exportable.",
+      complianceLabel: "Compliance & Security",
+      complianceTitle1: "Built for",
+      complianceTitle2: "regulated environments",
+      complianceSub: "Every architectural decision aligns with GDPR, the EU AI Act, and the principle of data minimization.",
+      complianceItem1Title: "Local processing",
+      complianceItem1Sub: "GDPR Art. 5 & 24 — data sovereignty through on-premise operation",
+      complianceItem2Title: "Namespace isolation",
+      complianceItem2Sub: "GDPR Art. 32 — tenant separation per municipality",
+      complianceItem3Title: "Role-based access control",
+      complianceItem3Sub: "GDPR Art. 25 — privacy by design via Keycloak RBAC",
+      complianceItem4Title: "Hash-based audit log",
+      complianceItem4Sub: "AI Act Art. 12 — traceability without storing PII",
+      complianceItem5Title: "AI transparency footer",
+      complianceItem5Sub: "AI Act transparency duties — automated notice for citizen-facing queries",
+      complianceStat1: "Local processing",
+      complianceStat2: "External API calls",
+      complianceStat3: "User roles",
+      complianceStat4: "Art. 5, 24, 25, 32",
+      featuresLabel: "Features",
+      featuresTitle1: "Everything a",
+      featuresTitle2: "municipal administration needs",
+      feature1Title: "Dashboard & monitoring",
+      feature1Desc: "Real-time metrics for documents, queries, latency, and storage, visualized in Grafana.",
+      feature2Title: "Hybrid RAG chat",
+      feature2Desc: "Dense and sparse retrieval with reranking and source-grounded answers including confidence scoring.",
+      feature3Title: "Document management",
+      feature3Desc: "Upload and process PDF, DOCX, XLSX, and PPTX files with live status tracking.",
+      feature4Title: "Audit & compliance",
+      feature4Desc: "Filterable, exportable logs with SHA-256 hashing aligned with AI Act expectations.",
+      feature5Title: "User management",
+      feature5Desc: "Keycloak-backed RBAC with 5 roles: citizen, staff, document admin, admin, and auditor.",
+      feature6Title: "Citizen chat widget",
+      feature6Desc: "Embeddable chat for municipal websites with zero external calls and a built-in AI notice.",
+      ctaBadge1: "GDPR-aligned",
+      ctaBadge2: "AI Act Art. 12 & 13",
+      ctaBadge3: "On-premise",
+      ctaBadge4: "Open source",
+      ctaBadge5: "Docker",
+      ctaTitle1: "Ready for sovereign",
+      ctaTitle2: "municipal AI?",
+      ctaSub: "Start the demo on your own infrastructure in under 5 minutes.",
+      ctaPrimary: "Start live demo",
+      ctaSecondary: "View on GitHub",
+      footerTagline: "Sovereign municipal AI platform",
+      footerLegal: "Legal notice",
+      footerPrivacy: "Privacy",
+      footerContact: "Contact",
+      footerCopy: "© 2026 cityXai. All rights reserved."
+    }
+  };
+
+  function applyLanguage(language) {
+    const dict = translations[language] || translations.de;
+    document.documentElement.lang = language;
+    document.title = dict.pageTitle || translations.de.pageTitle;
+    localStorage.setItem("cityxai_landing_language", language);
+    document.querySelectorAll("[data-i18n]").forEach((element) => {
+      const key = element.getAttribute("data-i18n");
+      if (key && dict[key]) {
+        element.textContent = dict[key];
+      }
+    });
+    document.querySelectorAll("[data-lang]").forEach((button) => {
+      button.classList.toggle("active", button.getAttribute("data-lang") === language);
+    });
+  }
+
+  const savedLanguage = localStorage.getItem("cityxai_landing_language");
+  applyLanguage(savedLanguage === "en" ? "en" : "de");
+
+  document.querySelectorAll("[data-lang]").forEach((button) => {
+    button.addEventListener("click", () => {
+      applyLanguage(button.getAttribute("data-lang"));
+    });
+  });
+
   // Intersection observer for scroll-triggered fade-in
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {

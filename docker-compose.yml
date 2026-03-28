@@ -42,6 +42,7 @@ services:
       context: .
       dockerfile: frontend/admin-portal/Dockerfile
     environment:
+      DEMO_LOGIN_ENABLED: "true"
       NEXT_PUBLIC_NAMESPACE: ${MUNICIPALITY_NAMESPACE:-paderborn}
       HOSTNAME: 0.0.0.0
       PORT: 3000
@@ -61,6 +62,7 @@ services:
       MUNICIPALITY_NAMESPACE: ${MUNICIPALITY_NAMESPACE:-paderborn}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@demo.de}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Demo1234!}
+      ANONYMIZED_TELEMETRY: "FALSE"
       JWT_SECRET: ${JWT_SECRET:-change-me}
       DB_ENCRYPT_KEY: ${DB_ENCRYPT_KEY:-change-me-too}
       OLLAMA_PRIMARY_MODEL: ${OLLAMA_PRIMARY_MODEL:-qwen3:8b-q4_K_M}
@@ -173,8 +175,8 @@ services:
     image: quay.io/keycloak/keycloak:26.0
     command: ["start-dev", "--import-realm", "--http-enabled=true", "--hostname-strict=false", "--proxy-headers=xforwarded"]
     environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Demo1234!}
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Demo1234!}
       KC_HEALTH_ENABLED: "true"
       KC_METRICS_ENABLED: "true"
     volumes:

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { LanguageSelector, useI18n } from "../lib/i18n";
 
 // Parse JWT payload without validation (display only)
 function parseToken(token: string): Record<string, any> | null {
@@ -21,16 +22,17 @@ function getRoles(token: string | null): string[] {
 }
 
 const NAV = [
-  { href: "/dashboard", label: "Dashboard",  icon: <GridIcon />,   roles: [] }, // visible to all
-  { href: "/documents", label: "Dokumente",  icon: <FolderIcon />, roles: ["document_admin", "system_admin"] },
-  { href: "/chat",      label: "Fachchat",   icon: <ChatIcon />,   roles: ["staff", "document_admin", "system_admin"] },
-  { href: "/audit",     label: "Audit",      icon: <ShieldIcon />, roles: ["readonly_auditor", "system_admin"] },
-  { href: "/users",     label: "Benutzer",   icon: <UsersIcon />,  roles: ["system_admin"] },
+  { href: "/dashboard", de: "Dashboard", en: "Dashboard", icon: <GridIcon />, roles: [] },
+  { href: "/documents", de: "Dokumente", en: "Documents", icon: <FolderIcon />, roles: ["document_admin", "system_admin"] },
+  { href: "/chat", de: "Fachchat", en: "Expert Chat", icon: <ChatIcon />, roles: ["staff", "document_admin", "system_admin"] },
+  { href: "/audit", de: "Audit", en: "Audit", icon: <ShieldIcon />, roles: ["readonly_auditor", "system_admin"] },
+  { href: "/users", de: "Benutzer", en: "Users", icon: <UsersIcon />, roles: ["system_admin"] },
 ];
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { language } = useI18n();
   const [roles, setRoles] = useState<string[]>([]);
   const [email, setEmail] = useState<string>("");
 
@@ -61,15 +63,15 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <div className="sidebar-brand">
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.svg" alt="cityXai" width={36} height={32} style={{ flexShrink: 0 }} />
+            <img src="/logo.svg" alt="cityXai" width={36} height={36} style={{ flexShrink: 0, borderRadius: 8 }} />
             <h2>cityXai</h2>
           </div>
-          <p>Kommunaler Copilot</p>
+          <p>{language === "de" ? "Kommunaler Copilot" : "Municipal Copilot"}</p>
         </div>
-        {visibleNav.map(({ href, label, icon }) => (
+        {visibleNav.map(({ href, de, en, icon }) => (
           <Link key={href} href={href} className={pathname.startsWith(href) ? "active" : ""}>
             {icon}
-            {label}
+            {language === "de" ? de : en}
           </Link>
         ))}
 
@@ -88,6 +90,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
               {email}
             </div>
           )}
+          <LanguageSelector />
           <button
             onClick={logout}
             style={{
@@ -107,7 +110,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             }}
           >
             <LogoutIcon />
-            Abmelden
+            {language === "de" ? "Abmelden" : "Sign out"}
           </button>
         </div>
       </aside>

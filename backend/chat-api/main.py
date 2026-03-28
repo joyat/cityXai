@@ -3,20 +3,38 @@ from __future__ import annotations
 import os
 import time
 import uuid
-from collections import defaultdict
 
-from fastapi import Depends, FastAPI, Header
+from fastapi import Depends, FastAPI, Header, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram, generate_latest
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
 
 from audit import log_query_event
-from backend.shared.auth import require_roles
+from backend.shared.auth import check_required_secrets, require_roles
 from backend.shared.models import QueryRequest, QueryResponse, UserClaim
 from llm import call_ollama
-from reranker import CrossEncoderReranker
+from reranker import TermOverlapReranker
 from retrieval import HybridRetriever
+
+# Bounded session history store: keyed by "{user_sub}:{session_id}"
+# Capped at _HISTORY_MAX_SESSIONS total entries to prevent unbounded growth.
+_HISTORY_MAX_SESSIONS = 500
+_history_store: dict[str, list[dict]] = {}
+
+
+def _history_set(user_sub: str, session_id: str, messages: list[dict]) -> None:
+    key = f"{user_sub}:{session_id}"
+    if len(_history_store) >= _HISTORY_MAX_SESSIONS and key not in _history_store:
+        # Evict the oldest entry
+        oldest = next(iter(_history_store))
+        del _history_store[oldest]
+    _history_store[key] = messages
+
+
+def _history_get(user_sub: str, session_id: str) -> list[dict]:
+    return _history_store.get(f"{user_sub}:{session_id}", [])
 
 
 REQUEST_COUNT = Counter("chat_api_requests_total", "Total chat requests", ["method", "path", "status"])
@@ -36,15 +54,22 @@ class MetricsMiddleware(BaseHTTPMiddleware):
         return response
 
 
-app = FastAPI(title="cityXai Chat API")
+app = FastAPI(title="cityXai Chat API", docs_url=None, redoc_url=None)
 app.add_middleware(MetricsMiddleware)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[os.getenv("FRONTEND_ORIGIN", "https://localhost")],
+    allow_credentials=True,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Authorization", "Content-Type", "X-Namespace", "X-Dev-Mode"],
+)
 retriever = HybridRetriever()
-reranker = CrossEncoderReranker()
-history_store: dict[str, list[dict]] = defaultdict(list)
+reranker = TermOverlapReranker()
 
 
 @app.on_event("startup")
-def seed_metrics() -> None:
+def on_startup() -> None:
+    check_required_secrets()
     OLLAMA_TOKENS_PER_SEC.set(18.4)
     AVG_RETRIEVAL_SCORE.set(0.74)
 
@@ -75,9 +100,10 @@ async def chat_query(
             sparse_results.extend(retriever.sparse_search(query, payload.namespace))
     fused = dense_results if payload.retrieval_mode == "dense" else retriever.reciprocal_rank_fusion(dense_results, sparse_results)
     reranked = reranker.rerank(payload.query, fused, top_n=int(os.getenv("RERANK_TOP_N", "5")))
+    answer_context = reranked[: int(os.getenv("ANSWER_CONTEXT_TOP_N", "1"))] if reranked else []
     retrieval_scores = [round(chunk.get("rerank_score", chunk.get("rrf", chunk.get("score", 0.0))), 4) for chunk in reranked]
     AVG_RETRIEVAL_SCORE.set(sum(retrieval_scores) / len(retrieval_scores) if retrieval_scores else 0.0)
-    answer = call_ollama(payload.query, os.getenv("OLLAMA_PRIMARY_MODEL", "qwen3:8b-q4_K_M"), reranked, payload.conversation_history)
+    answer = call_ollama(payload.query, os.getenv("OLLAMA_PRIMARY_MODEL", "qwen3:8b-q4_K_M"), answer_context, payload.conversation_history)
     latency_ms = int((time.perf_counter() - started) * 1000)
     flagged = (sum(retrieval_scores) / len(retrieval_scores) if retrieval_scores else 0.0) < float(os.getenv("CONFIDENCE_THRESHOLD", "0.5"))
     event = log_query_event(
@@ -92,10 +118,15 @@ async def chat_query(
         flagged=flagged,
     )
     session_id = str(uuid.uuid4())
-    history_store[session_id] = payload.conversation_history + [{"role": "user", "content": payload.query}, {"role": "assistant", "content": answer}]
+    _history_set(
+        claim.sub,
+        session_id,
+        payload.conversation_history + [{"role": "user", "content": payload.query}, {"role": "assistant", "content": answer}],
+    )
     QUERY_VOLUME.labels(payload.namespace).inc()
     response = QueryResponse(
         answer=answer,
+        session_id=session_id,
         sources=[
             {
                 "filename": chunk["metadata"].get("filename"),
@@ -116,5 +147,12 @@ async def chat_query(
 
 
 @app.get("/chat/history/{session_id}")
-async def chat_history(session_id: str, claim: UserClaim = Depends(require_roles(["citizen", "staff", "document_admin", "system_admin", "readonly_auditor"]))):
-    return {"session_id": session_id, "history": history_store.get(session_id, [])}
+async def chat_history(
+    session_id: str,
+    claim: UserClaim = Depends(require_roles(["citizen", "staff", "document_admin", "system_admin", "readonly_auditor"])),
+):
+    # Enforce that users can only retrieve their own session history
+    history = _history_get(claim.sub, session_id)
+    if not history:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Session nicht gefunden")
+    return {"session_id": session_id, "history": history}

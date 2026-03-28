@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import os
 import time
 from typing import Iterable
@@ -11,6 +12,27 @@ from jose import jwt
 from jose.exceptions import ExpiredSignatureError, JOSEError
 
 from backend.shared.models import UserClaim
+
+logger = logging.getLogger(__name__)
+
+_WEAK_SECRETS = {"change-me", "change-me-too", "", "secret", "password"}
+
+
+def check_required_secrets() -> None:
+    """Call at app startup — logs warnings for any weak/default secret values."""
+    problems = []
+    jwt_secret = os.getenv("JWT_SECRET", "")
+    if jwt_secret.lower() in _WEAK_SECRETS:
+        problems.append("JWT_SECRET is set to a weak default value")
+    db_key = os.getenv("DB_ENCRYPT_KEY", "")
+    if db_key.lower() in _WEAK_SECRETS:
+        problems.append("DB_ENCRYPT_KEY is set to a weak default value")
+    keycloak_pw = os.getenv("KEYCLOAK_ADMIN_PASSWORD", os.getenv("ADMIN_PASSWORD", ""))
+    if keycloak_pw.lower() in _WEAK_SECRETS or keycloak_pw == "Demo1234!":
+        problems.append("KEYCLOAK_ADMIN_PASSWORD is set to a weak/demo value")
+    if problems:
+        for p in problems:
+            logger.warning("SECURITY WARNING: %s — set a strong value in .env before production use", p)
 
 
 bearer = HTTPBearer(auto_error=False)
@@ -62,6 +84,7 @@ def decode_token(token: str) -> UserClaim:
                 token,
                 secret,
                 algorithms=["HS256"],
+                # HS256 is the dev-login path; issuer is not set in dev tokens
                 options={"verify_at_hash": False, "verify_aud": False, "verify_iss": False},
             )
         except ExpiredSignatureError as exc:
@@ -81,12 +104,22 @@ def decode_token(token: str) -> UserClaim:
             key = _find_key(header.get("kid"))
         if not key:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unbekannter Signaturschlüssel")
+        expected_issuer = os.getenv(
+            "KEYCLOAK_ISSUER",
+            "http://keycloak:8080/realms/cityxai",
+        )
+        decode_options: dict = {"verify_at_hash": False, "verify_aud": False}
+        decode_kwargs: dict = {"algorithms": [alg]}
+        if expected_issuer:
+            decode_kwargs["issuer"] = expected_issuer
+        else:
+            decode_options["verify_iss"] = False
         try:
             payload = jwt.decode(
                 token,
                 key,
-                algorithms=[alg],
-                options={"verify_at_hash": False, "verify_aud": False, "verify_iss": False},
+                options=decode_options,
+                **decode_kwargs,
             )
         except ExpiredSignatureError as exc:
             raise HTTPException(
