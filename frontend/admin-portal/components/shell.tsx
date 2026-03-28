@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -59,7 +60,10 @@ export function Shell({ children }: { children: React.ReactNode }) {
     <div className="layout">
       <aside className="sidebar">
         <div className="sidebar-brand">
-          <h2>cityXai</h2>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <Image src="/logo.svg" alt="cityXai" width={36} height={32} style={{ flexShrink: 0 }} />
+            <h2>cityXai</h2>
+          </div>
           <p>Kommunaler Copilot</p>
         </div>
         {visibleNav.map(({ href, label, icon }) => (

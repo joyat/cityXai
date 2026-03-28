@@ -6,14 +6,19 @@
   --bg-mid:           #0f1535;
   --bg-surface:       rgba(255,255,255,0.05);
   --bg-surface-hover: rgba(255,255,255,0.09);
+  /* Logo palette: cyan → mid-blue → deep navy */
   --cyan:             #00d4ff;
   --cyan-dim:         rgba(0,212,255,0.12);
   --cyan-glow:        0 0 24px rgba(0,212,255,0.35);
-  --violet:           #7c3aed;
-  --violet-dim:       rgba(124,58,237,0.12);
-  --grad-primary:     linear-gradient(135deg,#00d4ff 0%,#7c3aed 100%);
+  --blue:             #1a7ab5;
+  --blue-dim:         rgba(26,122,181,0.15);
+  --navy:             #0d2b5e;
+  /* keep --violet alias so existing badge classes still work */
+  --violet:           #1a7ab5;
+  --violet-dim:       rgba(26,122,181,0.15);
+  --grad-primary:     linear-gradient(135deg,#7ee8ff 0%,#2ba8d4 50%,#0d2b5e 100%);
   --grad-bg:          radial-gradient(ellipse at 18% 0%,rgba(0,212,255,0.10) 0%,transparent 52%),
-                      radial-gradient(ellipse at 82% 100%,rgba(124,58,237,0.09) 0%,transparent 52%),
+                      radial-gradient(ellipse at 82% 100%,rgba(26,122,181,0.09) 0%,transparent 52%),
                       #0a0e27;
   --grad-card:        linear-gradient(135deg,rgba(255,255,255,0.07) 0%,rgba(255,255,255,0.02) 100%);
   --text:             #e2e8f5;
@@ -192,7 +197,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 .card-accent {
-  background: linear-gradient(135deg,rgba(0,212,255,0.07) 0%,rgba(124,58,237,0.05) 100%);
+  background: linear-gradient(135deg,rgba(0,212,255,0.07) 0%,rgba(26,122,181,0.05) 100%);
   border-color: var(--border-accent);
 }
 
@@ -307,7 +312,7 @@ label {
 .badge.success { background:var(--success-dim); color:var(--success); border-color:rgba(16,185,129,0.22); }
 .badge.warning { background:var(--warning-dim); color:var(--warning); border-color:rgba(245,158,11,0.22); }
 .badge.danger  { background:var(--danger-dim);  color:var(--danger);  border-color:rgba(239,68,68,0.22); }
-.badge.violet  { background:var(--violet-dim);  color:#a78bfa;        border-color:rgba(124,58,237,0.22); }
+.badge.violet  { background:var(--blue-dim);    color:#6dd5fa;        border-color:rgba(26,122,181,0.30); }
 
 /* ─── Tables ─────────────────────────────────────────────────────────────── */
 table { width:100%; border-collapse:collapse; font-size:0.85rem; }

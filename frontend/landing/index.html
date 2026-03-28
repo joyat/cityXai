@@ -10,7 +10,10 @@
     /* ── Tokens ── */
     :root {
       --cyan:    #00d4ff;
-      --violet:  #7c3aed;
+      --blue:    #1a7ab5;
+      --navy:    #0d2b5e;
+      /* alias kept for badge classes */
+      --violet:  #1a7ab5;
       --bg:      #0a0e27;
       --bg-card: rgba(255,255,255,0.05);
       --border:  rgba(255,255,255,0.09);
@@ -18,7 +21,7 @@
       --muted:   #6b7a99;
       --faint:   #2e3a55;
       --success: #10b981;
-      --grad:    linear-gradient(135deg,#00d4ff 0%,#7c3aed 100%);
+      --grad:    linear-gradient(135deg,#7ee8ff 0%,#2ba8d4 50%,#0d2b5e 100%);
       --r:       16px;
     }
 
@@ -125,7 +128,7 @@
       pointer-events: none;
     }
     .hero-orb-1 { width:500px; height:500px; background:rgba(0,212,255,0.09); top:-100px; left:-80px; animation: floatY 8s ease-in-out infinite; }
-    .hero-orb-2 { width:420px; height:420px; background:rgba(124,58,237,0.08); bottom:-60px; right:-60px; animation: floatY 10s 2s ease-in-out infinite; }
+    .hero-orb-2 { width:420px; height:420px; background:rgba(26,122,181,0.08); bottom:-60px; right:-60px; animation: floatY 10s 2s ease-in-out infinite; }
     .hero-orb-3 { width:280px; height:280px; background:rgba(0,212,255,0.05); top:40%; left:50%; transform:translate(-50%,-50%); animation: floatY 12s 1s ease-in-out infinite; }
 
     .hero-inner { position: relative; z-index: 1; max-width: 820px; }
@@ -260,7 +263,7 @@
       margin-bottom: 18px;
     }
     .prop-icon.cyan   { background: rgba(0,212,255,0.12); }
-    .prop-icon.violet { background: rgba(124,58,237,0.12); }
+    .prop-icon.violet { background: rgba(26,122,181,0.14); }
     .prop-icon.green  { background: rgba(16,185,129,0.12); }
     .prop-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
     .prop-desc  { font-size: 0.875rem; color: var(--muted); line-height: 1.65; }
@@ -344,7 +347,7 @@
       overflow-x: auto;
     }
     .code-block .key   { color: var(--cyan); }
-    .code-block .value { color: #a78bfa; }
+    .code-block .value { color: #6dd5fa; }
     .code-block .str   { color: var(--success); }
     .code-block .num   { color: #f59e0b; }
 
@@ -433,7 +436,10 @@
 
 <!-- ── Navigation ──────────────────────────────────────────────────────── -->
 <nav>
-  <div class="nav-brand">⚡ cityXai</div>
+  <div class="nav-brand" style="display:flex;align-items:center;gap:9px;">
+    <img src="/landing/logo.svg" alt="cityXai" width="28" height="25" style="filter:drop-shadow(0 0 6px rgba(0,212,255,0.5))"/>
+    cityXai
+  </div>
   <div class="nav-links">
     <a href="#features">Features</a>
     <a href="#compliance">Compliance</a>
@@ -449,6 +455,16 @@
   <div class="hero-orb hero-orb-3"></div>
 
   <div class="hero-inner">
+    <div class="fade-in" style="display:flex;justify-content:center;margin-bottom:28px;">
+      <img
+        src="/landing/logo.svg"
+        alt="cityXai"
+        width="96"
+        height="86"
+        style="filter:drop-shadow(0 0 28px rgba(0,212,255,0.55)) drop-shadow(0 0 60px rgba(26,122,181,0.3));"
+      />
+    </div>
+
     <div class="hero-badge fade-in">
       <span class="hero-badge-dot"></span>
       Lokal gehostet · DSGVO-konform · KI-Verordnung Art. 13
@@ -619,7 +635,7 @@
           <div style="font-size:0.78rem; color:var(--muted); margin-top:4px;">Externe API-Aufrufe</div>
         </div>
         <div class="glass-card" style="text-align:center; padding:20px 16px;">
-          <div style="font-size:1.6rem; font-weight:800; color:#a78bfa;">5</div>
+          <div style="font-size:1.6rem; font-weight:800; color:#6dd5fa;">5</div>
           <div style="font-size:0.78rem; color:var(--muted); margin-top:4px;">Benutzerrollen</div>
         </div>
         <div class="glass-card" style="text-align:center; padding:20px 16px;">
@@ -695,7 +711,10 @@
 <!-- ── Footer ───────────────────────────────────────────────────────────── -->
 <footer>
   <div>
-    <span style="color:var(--text); font-weight:600;">⚡ cityXai</span>
+    <span style="display:inline-flex;align-items:center;gap:8px;color:var(--text);font-weight:600;">
+      <img src="/landing/logo.svg" alt="cityXai" width="22" height="20" style="filter:drop-shadow(0 0 4px rgba(0,212,255,0.4))"/>
+      cityXai
+    </span>
     &nbsp;— Souveräne kommunale KI-Plattform
   </div>
   <div class="footer-links">

@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Image from "next/image";
 
 export default function LoginPage() {
   const [error, setError] = useState("");
@@ -44,11 +45,11 @@ export default function LoginPage() {
   return (
     <div style={{
       minHeight:"100vh", display:"grid", placeItems:"center", padding:"24px",
-      background:"radial-gradient(ellipse at 30% 20%, rgba(0,212,255,0.13) 0%, transparent 50%), radial-gradient(ellipse at 70% 80%, rgba(124,58,237,0.11) 0%, transparent 50%), #0a0e27",
+      background:"radial-gradient(ellipse at 30% 20%, rgba(0,212,255,0.13) 0%, transparent 50%), radial-gradient(ellipse at 70% 80%, rgba(26,122,181,0.11) 0%, transparent 50%), #0a0e27",
     }}>
       <div style={{ position:"fixed", inset:0, overflow:"hidden", pointerEvents:"none", zIndex:0 }}>
         <div style={{ position:"absolute", top:"10%", left:"6%", width:340, height:340, borderRadius:"50%", background:"rgba(0,212,255,0.05)", filter:"blur(70px)" }} />
-        <div style={{ position:"absolute", bottom:"12%", right:"8%", width:300, height:300, borderRadius:"50%", background:"rgba(124,58,237,0.06)", filter:"blur(70px)" }} />
+        <div style={{ position:"absolute", bottom:"12%", right:"8%", width:300, height:300, borderRadius:"50%", background:"rgba(26,122,181,0.08)", filter:"blur(70px)" }} />
       </div>
 
       <form onSubmit={login} style={{
@@ -59,15 +60,18 @@ export default function LoginPage() {
         padding:"40px 34px", boxShadow:"0 24px 80px rgba(0,0,0,0.5)",
       }}>
         <div style={{ marginBottom:30, textAlign:"center" }}>
-          <div style={{
-            display:"inline-flex", alignItems:"center", justifyContent:"center",
-            width:50, height:50, borderRadius:"15px",
-            background:"linear-gradient(135deg,#00d4ff,#7c3aed)",
-            boxShadow:"0 0 28px rgba(0,212,255,0.45)", marginBottom:16, fontSize:22,
-          }}>⚡</div>
+          <div style={{ display:"flex", justifyContent:"center", marginBottom:14 }}>
+            <Image
+              src="/logo.svg"
+              alt="cityXai"
+              width={72}
+              height={64}
+              style={{ filter:"drop-shadow(0 0 18px rgba(0,212,255,0.45))" }}
+            />
+          </div>
           <h1 style={{
             fontSize:"1.65rem", fontWeight:700, letterSpacing:"-0.02em",
-            background:"linear-gradient(135deg,#00d4ff,#a78bfa)",
+            background:"linear-gradient(135deg,#7ee8ff,#2ba8d4,#0d2b5e)",
             WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text",
           }}>cityXai</h1>
           <p style={{ color:"var(--text-muted)", fontSize:"0.82rem", marginTop:5 }}>
