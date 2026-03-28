@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import Image from "next/image";
 
 export default function LoginPage() {
   const [error, setError] = useState("");
@@ -61,7 +60,8 @@ export default function LoginPage() {
       }}>
         <div style={{ marginBottom:30, textAlign:"center" }}>
           <div style={{ display:"flex", justifyContent:"center", marginBottom:14 }}>
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src="/logo.svg"
               alt="cityXai"
               width={72}
