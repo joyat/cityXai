@@ -119,25 +119,77 @@
     .nav-links { display: flex; gap: 28px; align-items: center; }
     .nav-links a { font-size: 0.875rem; color: var(--muted); transition: color 0.2s, text-shadow 0.2s; }
     .nav-links a:hover { color: var(--text); text-shadow: 0 0 12px rgba(108,236,255,0.2); }
-    .btn-nav {
-      padding: 8px 18px;
-      border-radius: 10px;
-      background: var(--grad);
-      background-size: 200% 200%;
-      color: #fff;
-      font-size: 0.875rem;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      animation: gradientShift 6s ease-in-out infinite;
-      transition: box-shadow 0.2s, transform 0.2s, filter 0.2s;
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
-    .btn-nav:hover { box-shadow: 0 0 28px rgba(108,236,255,0.34); transform: translateY(-1px); filter: brightness(1.06); }
+    .btn-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      font-size: 0.82rem;
+      font-weight: 650;
+      border: 1px solid rgba(255,255,255,0.08);
+      cursor: pointer;
+      transition: box-shadow 0.2s, transform 0.2s, background 0.2s, border-color 0.2s;
+    }
+    .btn-nav:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(108,236,255,0.18);
+      box-shadow: 0 0 18px rgba(108,236,255,0.10);
+      transform: translateY(-1px);
+    }
+    .login-trigger-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 14px rgba(108,236,255,0.55);
+      flex-shrink: 0;
+    }
+    .login-trigger-chevron {
+      width: 8px;
+      height: 8px;
+      border-right: 1.8px solid currentColor;
+      border-bottom: 1.8px solid currentColor;
+      transform: rotate(45deg) translateY(-1px);
+      opacity: 0.7;
+      transition: transform 0.18s ease, opacity 0.18s ease;
+    }
+    .login-shell.open .login-trigger-chevron {
+      transform: rotate(-135deg) translateY(-1px);
+      opacity: 1;
+    }
+    .login-shell {
+      position: relative;
+    }
+    .login-dropdown {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      width: min(328px, calc(100vw - 32px));
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-8px);
+      transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+      pointer-events: none;
+      z-index: 120;
+    }
+    .login-shell.open .login-dropdown {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
     .lang-switch {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      margin-left: 18px;
     }
     .lang-switch button {
       padding: 6px 10px;
@@ -250,7 +302,128 @@
       gap: 18px;
       align-items: start;
     }
-
+    .auth-panel {
+      position: relative;
+      border-radius: 22px;
+      border: 1px solid rgba(166,214,255,0.14);
+      background:
+        linear-gradient(180deg, rgba(14,20,40,0.98), rgba(9,14,29,0.96)),
+        linear-gradient(135deg, rgba(108,236,255,0.03), rgba(111,124,255,0.02));
+      backdrop-filter: blur(8px) saturate(125%);
+      box-shadow: 0 22px 54px rgba(0,0,0,0.44), inset 0 1px 0 rgba(255,255,255,0.04);
+      padding: 16px;
+      overflow: hidden;
+    }
+    .auth-panel::before {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      background: linear-gradient(135deg, rgba(108,236,255,0.08), transparent 40%, transparent 74%, rgba(111,124,255,0.06));
+      opacity: 0.22;
+      pointer-events: none;
+    }
+    .auth-panel-inner {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 14px;
+    }
+    .auth-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(108,236,255,0.16);
+      background: rgba(108,236,255,0.08);
+      color: var(--cyan);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .auth-kicker-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 12px rgba(108,236,255,0.6);
+    }
+    .auth-tabs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      padding: 5px;
+      border-radius: 14px;
+      background: rgba(5,10,22,0.92);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .auth-tab {
+      padding: 9px 10px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.79rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .auth-tab.active {
+      color: var(--text);
+      background: linear-gradient(135deg, rgba(33,41,67,0.98), rgba(26,49,66,0.96));
+      border-color: rgba(108,236,255,0.24);
+      box-shadow: 0 0 18px rgba(108,236,255,0.10), inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+    .auth-form {
+      display: grid;
+      gap: 10px;
+    }
+    .auth-field {
+      display: grid;
+      gap: 5px;
+    }
+    .auth-field label {
+      font-size: 0.74rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .auth-field input {
+      width: 100%;
+      padding: 12px 13px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(4,8,18,0.94);
+      color: var(--text);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .auth-field input:focus {
+      border-color: rgba(108,236,255,0.28);
+      box-shadow: 0 0 0 4px rgba(108,236,255,0.08);
+    }
+    .auth-submit {
+      width: 100%;
+      justify-content: center;
+      margin-top: 2px;
+      padding: 12px 16px;
+      font-size: 0.88rem;
+    }
+    .auth-note {
+      font-size: 0.73rem;
+      color: var(--muted);
+      line-height: 1.55;
+      min-height: 2.2em;
+    }
+    .auth-error {
+      font-size: 0.76rem;
+      color: #fda4af;
+      min-height: 1.2em;
+    }
     .hero-badge {
       display: inline-flex;
       align-items: center;
@@ -746,7 +919,13 @@
     /* ── Responsive ── */
     @media (max-width: 900px) {
       nav { padding: 14px 20px; }
+      nav { align-items: flex-start; gap: 12px; }
       .nav-links { display: none; }
+      .nav-actions { margin-left: auto; }
+      .login-dropdown {
+        right: 0;
+        width: min(340px, calc(100vw - 40px));
+      }
       section { padding: 70px 24px; }
       .control-band { padding: 0 24px; margin-top: -10px; }
       .control-band-grid { grid-template-columns: 1fr; }
@@ -783,10 +962,48 @@
     <a href="#features" data-i18n="navFeatures">Features</a>
     <a href="#compliance" data-i18n="navCompliance">Compliance</a>
     <a href="#how" data-i18n="navHow">Funktionsweise</a>
-    <a class="btn-nav" href="https://localhost" data-i18n="navDemo">Demo starten</a>
+  </div>
+  <div class="nav-actions">
     <div class="lang-switch">
-      <button type="button" class="active" data-lang="de">Deutsch</button>
-      <button type="button" data-lang="en">English</button>
+      <button type="button" class="active" data-lang="de">De</button>
+      <button type="button" data-lang="en">En</button>
+    </div>
+    <div class="login-shell" id="login-shell">
+      <button type="button" class="btn-nav" id="login-toggle">
+        <span class="login-trigger-dot"></span>
+        <span data-i18n="navLogin">Login</span>
+        <span class="login-trigger-chevron" aria-hidden="true"></span>
+      </button>
+      <div class="login-dropdown">
+        <div class="auth-panel">
+          <div class="auth-panel-inner">
+            <div class="hero-panel-top" style="margin-bottom: 0; gap: 10px;">
+              <div class="hero-panel-title" data-i18n="authPanelTitle">Demo Access</div>
+            </div>
+            <div class="auth-kicker">
+              <span class="auth-kicker-dot"></span>
+              <span data-i18n="authKicker">Secure access</span>
+            </div>
+            <div class="auth-tabs" role="tablist" aria-label="Role selector">
+              <button type="button" class="auth-tab active" data-auth-role="staff" data-i18n="authTabStaff">Staff</button>
+              <button type="button" class="auth-tab" data-auth-role="administrator" data-i18n="authTabAdministrator">Administrator</button>
+            </div>
+            <form class="auth-form" id="landing-auth-form">
+              <div class="auth-field">
+                <label for="landing-email" data-i18n="authEmailLabel">Email address</label>
+                <input id="landing-email" name="email" type="email" autocomplete="email" required data-i18n-placeholder="authEmailPlaceholderStaff" placeholder="name@municipality.de" />
+              </div>
+              <div class="auth-field">
+                <label for="landing-password" data-i18n="authPasswordLabel">Password</label>
+                <input id="landing-password" name="password" type="password" autocomplete="current-password" required placeholder="••••••••" />
+              </div>
+              <p class="auth-note" id="landing-auth-note" data-i18n="authNoteStaff">Use your demo user email and password to open the staff workspace.</p>
+              <button type="submit" class="btn-primary auth-submit" id="landing-auth-submit" data-i18n="authSubmitStaff">Sign in</button>
+              <p class="auth-error" id="landing-auth-error"></p>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </nav>
@@ -819,7 +1036,7 @@
     </p>
 
     <div class="hero-ctas fade-in-delay-3">
-      <a class="btn-primary" href="https://localhost" data-i18n="heroPrimary">Zur Live-Demo</a>
+      <a class="btn-primary" href="/demo/" data-i18n="heroPrimary">Zur Live-Demo</a>
       <a class="btn-secondary" href="#how" data-i18n="heroSecondary">Wie es funktioniert ↓</a>
     </div>
 
@@ -831,38 +1048,33 @@
     </div>
 
     <div class="hero-side fade-in-delay-2">
-    <div class="hero-panel">
+      <div class="hero-panel">
         <div class="hero-panel-top">
-        <div class="hero-panel-title" data-i18n="heroPanelTitle">Live Stack</div>
-        <div class="hero-chip" data-i18n="heroPanelChip">Local-first</div>
-      </div>
-      <div class="hero-panel-grid">
-        <div class="hero-card">
-          <div class="hero-card-label" data-i18n="heroRuntimeLabel">Runtime</div>
-          <div class="hero-card-title" data-i18n="heroRuntimeTitle">Hybrid RAG, Keycloak RBAC, Grafana monitoring</div>
-          <div class="hero-card-desc" data-i18n="heroRuntimeDesc">A polished local AI stack for municipal workflows with grounded answers, auditability, and controlled data boundaries.</div>
+          <div class="hero-panel-title" data-i18n="heroPanelTitle">Live Stack</div>
+          <div class="hero-chip" data-i18n="heroPanelChip">Local-first</div>
         </div>
-        <div class="hero-stats">
-          <div class="hero-stat">
-            <strong>100%</strong>
-            <span data-i18n="heroStat1">On-prem data path</span>
+        <div class="hero-panel-grid">
+          <div class="hero-card">
+            <div class="hero-card-label" data-i18n="heroRuntimeLabel">Runtime</div>
+            <div class="hero-card-title" data-i18n="heroRuntimeTitle">Hybrid RAG, Keycloak RBAC, Grafana monitoring</div>
+            <div class="hero-card-desc" data-i18n="heroRuntimeDesc">A polished local AI stack for municipal workflows with grounded answers, auditability, and controlled data boundaries.</div>
           </div>
-          <div class="hero-stat">
-            <strong>0</strong>
-            <span data-i18n="heroStat2">External API calls</span>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <strong>100%</strong>
+              <span data-i18n="heroStat1">On-prem data path</span>
+            </div>
+            <div class="hero-stat">
+              <strong>0</strong>
+              <span data-i18n="heroStat2">External API calls</span>
+            </div>
+            <div class="hero-stat">
+              <strong>5</strong>
+              <span data-i18n="heroStat3">Access roles</span>
+            </div>
           </div>
-          <div class="hero-stat">
-            <strong>5</strong>
-            <span data-i18n="heroStat3">Access roles</span>
-          </div>
-        </div>
-        <div class="hero-card">
-          <div class="hero-card-label" data-i18n="heroFocusLabel">Demo Focus</div>
-          <div class="hero-card-title" data-i18n="heroFocusTitle">Sleek municipal AI without cloud compromise</div>
-          <div class="hero-card-desc" data-i18n="heroFocusDesc">Show upload, grounded chat, audit traceability, and observability in a single glassy operator experience.</div>
         </div>
       </div>
-    </div>
     </div>
   </div>
 </div>
@@ -1168,7 +1380,7 @@
       navFeatures: "Features",
       navCompliance: "Compliance",
       navHow: "Funktionsweise",
-      navDemo: "Demo starten",
+      navLogin: "Login",
       heroBadge: "Lokal gehostet · DSGVO-konform · KI-Verordnung Art. 13",
       heroTitlePrefix: "Souveräne KI",
       heroTitleFor: "für",
@@ -1182,6 +1394,20 @@
       heroRuntimeLabel: "Laufzeit",
       heroRuntimeTitle: "Hybrid RAG, Keycloak RBAC, Grafana-Monitoring",
       heroRuntimeDesc: "Ein lokal betriebener KI-Stack für kommunale Workflows mit quellengestützten Antworten, Auditierbarkeit und klaren Datengrenzen.",
+      authPanelTitle: "Demo-Zugang",
+      authKicker: "Sicherer Zugang",
+      authTabStaff: "Mitarbeitende",
+      authTabAdministrator: "Administrator",
+      authEmailLabel: "E-Mail-Adresse",
+      authPasswordLabel: "Passwort",
+      authEmailPlaceholderStaff: "staff@demo.de",
+      authEmailPlaceholderAdministrator: "admin@demo.de",
+      authNoteStaff: "Mit Demo-E-Mail und Passwort in den Facharbeitsplatz einloggen.",
+      authNoteAdministrator: "Der Demo-Admin ist vorausgefüllt. Geben Sie nur noch das Passwort ein und öffnen Sie das Admin-Portal.",
+      authSubmitStaff: "Anmelden",
+      authSubmitAdministrator: "Admin-Portal",
+      authSubmitLoading: "Wird angemeldet…",
+      authErrorFallback: "Login fehlgeschlagen",
       flowBoxTitle: "Datenfluss",
       flowBoxChip: "4 Schritte",
       flowIntroTitle: "Von kommunalen Akten zu gesteuerten Antworten",
@@ -1290,7 +1516,7 @@
       navFeatures: "Features",
       navCompliance: "Compliance",
       navHow: "How it works",
-      navDemo: "Launch demo",
+      navLogin: "Login",
       heroBadge: "Locally hosted · GDPR-aligned · AI Act Art. 13",
       heroTitlePrefix: "Sovereign AI",
       heroTitleFor: "for",
@@ -1304,6 +1530,20 @@
       heroRuntimeLabel: "Runtime",
       heroRuntimeTitle: "Hybrid RAG, Keycloak RBAC, Grafana monitoring",
       heroRuntimeDesc: "A locally operated AI stack for municipal workflows with grounded answers, auditability, and clear data boundaries.",
+      authPanelTitle: "Demo Access",
+      authKicker: "Secure access",
+      authTabStaff: "Staff",
+      authTabAdministrator: "Administrator",
+      authEmailLabel: "Email address",
+      authPasswordLabel: "Password",
+      authEmailPlaceholderStaff: "staff@demo.de",
+      authEmailPlaceholderAdministrator: "admin@demo.de",
+      authNoteStaff: "Use your demo email and password to enter the staff workspace.",
+      authNoteAdministrator: "The demo admin email is prefilled. Enter the password and continue to the admin portal.",
+      authSubmitStaff: "Sign in",
+      authSubmitAdministrator: "Admin Portal",
+      authSubmitLoading: "Signing in…",
+      authErrorFallback: "Login failed",
       flowBoxTitle: "Data Flow",
       flowBoxChip: "4 steps",
       flowIntroTitle: "From municipal records to governed answers",
@@ -1420,13 +1660,119 @@
         element.textContent = dict[key];
       }
     });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
+      const key = element.getAttribute("data-i18n-placeholder");
+      if (key && dict[key]) {
+        element.setAttribute("placeholder", dict[key]);
+      }
+    });
     document.querySelectorAll("[data-lang]").forEach((button) => {
       button.classList.toggle("active", button.getAttribute("data-lang") === language);
     });
+    syncAuthPanel();
+  }
+
+  let authRole = "staff";
+
+  function currentLanguage() {
+    return localStorage.getItem("cityxai_landing_language") === "en" ? "en" : "de";
+  }
+
+  function syncAuthPanel() {
+    const dict = translations[currentLanguage()] || translations.de;
+    const email = document.getElementById("landing-email");
+    const note = document.getElementById("landing-auth-note");
+    const submit = document.getElementById("landing-auth-submit");
+
+    document.querySelectorAll("[data-auth-role]").forEach((button) => {
+      button.classList.toggle("active", button.getAttribute("data-auth-role") === authRole);
+    });
+
+    if (email) {
+      email.value = authRole === "administrator" ? "admin@demo.de" : "staff@demo.de";
+      email.placeholder = authRole === "administrator"
+        ? dict.authEmailPlaceholderAdministrator
+        : dict.authEmailPlaceholderStaff;
+    }
+
+    if (note) {
+      note.textContent = authRole === "administrator" ? dict.authNoteAdministrator : dict.authNoteStaff;
+    }
+
+    if (submit) {
+      submit.textContent = authRole === "administrator" ? dict.authSubmitAdministrator : dict.authSubmitStaff;
+    }
   }
 
   const savedLanguage = localStorage.getItem("cityxai_landing_language");
   applyLanguage(savedLanguage === "en" ? "en" : "de");
+
+  const loginShell = document.getElementById("login-shell");
+  const loginToggle = document.getElementById("login-toggle");
+  if (loginToggle && loginShell) {
+    loginToggle.addEventListener("click", () => {
+      loginShell.classList.toggle("open");
+      const error = document.getElementById("landing-auth-error");
+      if (error) error.textContent = "";
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!loginShell.contains(event.target)) {
+        loginShell.classList.remove("open");
+      }
+    });
+  }
+
+  document.querySelectorAll("[data-auth-role]").forEach((button) => {
+    button.addEventListener("click", () => {
+      authRole = button.getAttribute("data-auth-role") || "staff";
+      const error = document.getElementById("landing-auth-error");
+      if (error) error.textContent = "";
+      syncAuthPanel();
+    });
+  });
+
+  const landingAuthForm = document.getElementById("landing-auth-form");
+  if (landingAuthForm) {
+    landingAuthForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const dict = translations[currentLanguage()] || translations.de;
+      const form = new FormData(landingAuthForm);
+      const submit = document.getElementById("landing-auth-submit");
+      const error = document.getElementById("landing-auth-error");
+
+      if (submit) submit.textContent = dict.authSubmitLoading;
+      if (error) error.textContent = "";
+
+      try {
+        const response = await fetch("/api/session-login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: String(form.get("email") || ""),
+            password: String(form.get("password") || ""),
+            redirect_to: authRole === "administrator" ? "/dashboard" : "/chat"
+          })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.ok) {
+          throw new Error(data.error || dict.authErrorFallback);
+        }
+        if (data.access_token) {
+          localStorage.setItem("cityxai_token", data.access_token);
+          document.cookie = `cityxai_token=${encodeURIComponent(data.access_token)}; Path=/; Max-Age=${60 * 60 * 8}; SameSite=Lax`;
+        }
+        if (loginShell) loginShell.classList.remove("open");
+        window.location.href = data.redirect_to || "/dashboard";
+      } catch (err) {
+        if (error) {
+          error.textContent = err instanceof Error ? err.message : dict.authErrorFallback;
+        }
+      } finally {
+        syncAuthPanel();
+      }
+    });
+  }
 
   document.querySelectorAll("[data-lang]").forEach((button) => {
     button.addEventListener("click", () => {

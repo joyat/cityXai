@@ -77,7 +77,7 @@ services:
       CHROMADB_HOST: chromadb
       CHROMADB_PORT: 8000
       KEYCLOAK_JWKS_URL: http://keycloak:8080/realms/cityxai/protocol/openid-connect/certs
-      KEYCLOAK_ISSUER: http://localhost/keycloak/realms/cityxai
+      KEYCLOAK_ISSUER: http://keycloak:8080/realms/cityxai
       KEYCLOAK_CLIENT_ID: cityxai-frontend
     depends_on:
       ollama:

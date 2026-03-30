@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+from text_utils import normalize_tokens, strip_metadata_lines
+
+
+def _content_text(chunk: dict) -> str:
+    return strip_metadata_lines(chunk["document"])
+
 
 class TermOverlapReranker:
     """
@@ -14,13 +20,18 @@ class TermOverlapReranker:
     def rerank(self, query: str, chunks: list[dict], top_n: int = 5) -> list[dict]:
         if not chunks:
             return []
-        query_terms = {term for term in query.lower().split() if term}
+        query_terms = normalize_tokens(query)
         scores = []
         for chunk in chunks:
-            document_terms = {term for term in chunk["document"].lower().split() if term}
-            overlap = len(query_terms & document_terms)
-            density = overlap / max(len(query_terms), 1)
-            score = density + (chunk.get("rrf") or chunk.get("score") or 0.0)
+            metadata = chunk.get("metadata", {})
+            document_terms = normalize_tokens(_content_text(chunk))
+            filename_terms = normalize_tokens(metadata.get("filename", ""))
+            section_terms = normalize_tokens(metadata.get("section_heading", ""))
+            content_overlap = len(query_terms & document_terms)
+            title_overlap = len(query_terms & (filename_terms | section_terms))
+            coverage = content_overlap / max(len(query_terms), 1)
+            title_boost = title_overlap / max(len(query_terms), 1)
+            score = (chunk.get("rrf") or chunk.get("score") or 0.0) + coverage + (title_boost * 1.5)
             scores.append(score)
         ranked = sorted(
             [{**chunk, "rerank_score": float(score)} for chunk, score in zip(chunks, scores)],

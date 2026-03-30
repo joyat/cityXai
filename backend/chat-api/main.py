@@ -103,7 +103,13 @@ async def chat_query(
     answer_context = reranked[: int(os.getenv("ANSWER_CONTEXT_TOP_N", "1"))] if reranked else []
     retrieval_scores = [round(chunk.get("rerank_score", chunk.get("rrf", chunk.get("score", 0.0))), 4) for chunk in reranked]
     AVG_RETRIEVAL_SCORE.set(sum(retrieval_scores) / len(retrieval_scores) if retrieval_scores else 0.0)
-    answer = call_ollama(payload.query, os.getenv("OLLAMA_PRIMARY_MODEL", "qwen3:8b-q4_K_M"), answer_context, payload.conversation_history)
+    answer = call_ollama(
+        payload.query,
+        os.getenv("OLLAMA_PRIMARY_MODEL", "qwen3:8b-q4_K_M"),
+        answer_context,
+        payload.conversation_history,
+        payload.response_language,
+    )
     latency_ms = int((time.perf_counter() - started) * 1000)
     flagged = (sum(retrieval_scores) / len(retrieval_scores) if retrieval_scores else 0.0) < float(os.getenv("CONFIDENCE_THRESHOLD", "0.5"))
     event = log_query_event(

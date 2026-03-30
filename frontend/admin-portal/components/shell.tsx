@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { LanguageSelector, useI18n } from "../lib/i18n";
+import { clearToken, getToken } from "../lib/api";
 
 // Parse JWT payload without validation (display only)
 function parseToken(token: string): Record<string, any> | null {
@@ -37,10 +38,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const [email, setEmail] = useState<string>("");
 
   useEffect(() => {
-    const token = document.cookie
-      .split("; ")
-      .find((c) => c.startsWith("cityxai_token="))
-      ?.split("=")[1];
+    const token = getToken();
     if (token) {
       const decoded = parseToken(decodeURIComponent(token));
       setRoles(decoded?.realm_access?.roles ?? []);
@@ -49,7 +47,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   }, []);
 
   function logout() {
-    document.cookie = "cityxai_token=; Path=/; Max-Age=0; SameSite=Lax";
+    clearToken();
     router.push("/login");
   }
 
@@ -63,7 +61,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <div className="sidebar-brand">
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.svg" alt="cityXai" width={36} height={36} style={{ flexShrink: 0, borderRadius: 8 }} />
+            <img src="/logo.png" alt="cityXai" width={48} height={24} style={{ flexShrink: 0, height: "auto" }} />
             <h2>cityXai</h2>
           </div>
           <p>{language === "de" ? "Kommunaler Copilot" : "Municipal Copilot"}</p>

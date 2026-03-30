@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { LanguageSelector, useI18n } from "../../lib/i18n";
+import { setToken } from "../../lib/api";
 
 export default function LoginPage() {
   const { language } = useI18n();
@@ -13,29 +15,21 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
     const form = new FormData(event.currentTarget);
-    const params = new URLSearchParams();
-    params.set("client_id", "cityxai-frontend");
-    params.set("grant_type", "password");
-    params.set("username", String(form.get("email")));
-    params.set("password", String(form.get("password")));
     try {
-      let response = await fetch("/keycloak/realms/cityxai/protocol/openid-connect/token", {
+      const response = await fetch("/api/session-login", {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: params,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: String(form.get("email") || ""),
+          password: String(form.get("password") || "")
+        }),
       });
-      let data = await response.json();
-      if (!response.ok || !data.access_token) {
-        response = await fetch("/api/dev-login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: String(form.get("email")), password: String(form.get("password")) }),
-        });
-        data = await response.json();
+      const data = await response.json();
+      if (!response.ok || !data.ok) throw new Error(data.error || (language === "de" ? "Login fehlgeschlagen" : "Login failed"));
+      if (data.access_token) {
+        setToken(data.access_token);
       }
-      if (!response.ok || !data.access_token) throw new Error(data.error_description || data.error || (language === "de" ? "Login fehlgeschlagen" : "Login failed"));
-      document.cookie = `cityxai_token=${encodeURIComponent(data.access_token)}; Path=/; SameSite=Lax`;
-      window.location.href = "/dashboard";
+      window.location.href = data.redirect_to || "/dashboard";
     } catch (err) {
       setError(err instanceof Error ? err.message : (language === "de" ? "Login fehlgeschlagen" : "Login failed"));
     } finally {
@@ -60,18 +54,36 @@ export default function LoginPage() {
         border:"1px solid rgba(255,255,255,0.10)", borderRadius:"22px",
         padding:"40px 34px", boxShadow:"0 24px 80px rgba(0,0,0,0.5)",
       }}>
-        <div style={{ display:"flex", justifyContent:"flex-end", marginBottom:18 }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:18, gap:12 }}>
+          <Link
+            href="/main/"
+            style={{
+              display:"inline-flex",
+              alignItems:"center",
+              gap:8,
+              color:"var(--text-muted)",
+              textDecoration:"none",
+              fontSize:"0.8rem",
+              border:"1px solid rgba(255,255,255,0.12)",
+              background:"rgba(7,12,30,0.55)",
+              padding:"8px 12px",
+              borderRadius:"999px",
+            }}
+          >
+            <span aria-hidden="true">←</span>
+            {language === "de" ? "Zur Hauptseite" : "Back to main"}
+          </Link>
           <LanguageSelector />
         </div>
         <div style={{ marginBottom:30, textAlign:"center" }}>
           <div style={{ display:"flex", justifyContent:"center", marginBottom:14 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/logo.svg"
+              src="/logo.png"
               alt="cityXai"
-              width={88}
+              width={176}
               height={88}
-              style={{ filter:"drop-shadow(0 0 18px rgba(0,212,255,0.45))", borderRadius: 16 }}
+              style={{ filter:"drop-shadow(0 0 18px rgba(0,212,255,0.3))", maxWidth:"100%", height:"auto" }}
             />
           </div>
           <h1 style={{
