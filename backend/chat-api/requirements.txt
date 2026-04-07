@@ -1,6 +1,7 @@
 fastapi
 uvicorn
 chromadb==0.5.11
+posthog<4.0
 rank_bm25
 httpx
 prometheus-client

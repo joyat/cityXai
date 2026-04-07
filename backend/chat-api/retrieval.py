@@ -6,6 +6,7 @@ import time
 from collections import defaultdict
 
 import chromadb
+from chromadb.config import Settings as ChromaSettings
 import httpx
 from rank_bm25 import BM25Okapi
 
@@ -23,6 +24,7 @@ class HybridRetriever:
         self.client = chromadb.HttpClient(
             host=os.getenv("CHROMADB_HOST", "chromadb"),
             port=int(os.getenv("CHROMADB_PORT", "8000")),
+            settings=ChromaSettings(anonymized_telemetry=False),
         )
         self.ollama_url = os.getenv("OLLAMA_URL", "http://ollama:11434")
         self.embed_model = os.getenv("EMBED_MODEL", "nomic-embed-text:v1.5")

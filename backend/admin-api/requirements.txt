@@ -5,4 +5,5 @@ prometheus-client
 pydantic
 httpx
 chromadb==0.5.11
+posthog<4.0
 python-multipart
