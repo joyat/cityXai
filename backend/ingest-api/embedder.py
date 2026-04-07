@@ -5,11 +5,16 @@ from typing import Iterable
 
 import chromadb
 import httpx
+from chromadb.config import Settings as ChromaSettings
 
 
 class Embedder:
     def __init__(self) -> None:
-        self.client = chromadb.HttpClient(host=os.getenv("CHROMADB_HOST", "chromadb"), port=int(os.getenv("CHROMADB_PORT", "8000")))
+        self.client = chromadb.HttpClient(
+            host=os.getenv("CHROMADB_HOST", "chromadb"),
+            port=int(os.getenv("CHROMADB_PORT", "8000")),
+            settings=ChromaSettings(anonymized_telemetry=False),
+        )
         self.ollama_url = os.getenv("OLLAMA_URL", "http://ollama:11434")
         self.embed_model = os.getenv("EMBED_MODEL", "nomic-embed-text:v1.5")
         self.namespace = os.getenv("MUNICIPALITY_NAMESPACE", "paderborn")

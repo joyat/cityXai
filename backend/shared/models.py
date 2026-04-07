@@ -22,6 +22,7 @@ class QueryRequest(BaseModel):
     namespace: str = Field(min_length=1, max_length=64)
     conversation_history: list[dict[str, str]] = Field(default_factory=list, max_length=50)
     retrieval_mode: Literal["hybrid", "dense"] = "hybrid"
+    response_language: Literal["de", "en"] = "de"
 
 
 class QueryResponse(BaseModel):

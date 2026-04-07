@@ -1,9 +1,28 @@
 "use client";
 
+const TOKEN_STORAGE_KEY = "cityxai_token";
+
 export function getToken() {
   if (typeof document === "undefined") return "";
-  const match = document.cookie.match(/(?:^|; )cityxai_token=([^;]+)/);
-  return match ? decodeURIComponent(match[1]) : "";
+  const stored = window.localStorage.getItem(TOKEN_STORAGE_KEY);
+  if (stored) return stored;
+  const cookies = document.cookie
+    .split("; ")
+    .filter((entry) => entry.startsWith("cityxai_token="));
+  const latest = cookies.at(-1)?.split("=")[1];
+  return latest ? decodeURIComponent(latest) : "";
+}
+
+export function setToken(token: string) {
+  if (typeof document === "undefined") return;
+  window.localStorage.setItem(TOKEN_STORAGE_KEY, token);
+  document.cookie = `cityxai_token=${encodeURIComponent(token)}; Path=/; Max-Age=${60 * 60 * 8}; SameSite=Lax`;
+}
+
+export function clearToken() {
+  if (typeof document === "undefined") return;
+  window.localStorage.removeItem(TOKEN_STORAGE_KEY);
+  document.cookie = "cityxai_token=; Path=/; Max-Age=0; SameSite=Lax";
 }
 
 export async function apiFetch(path: string, options: RequestInit = {}) {

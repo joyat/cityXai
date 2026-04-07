@@ -24,7 +24,13 @@ export default function ChatPage() {
       const response = await apiFetch("/api/chat/query", {
         method: "POST",
         headers: { "X-Dev-Mode": String(devMode) },
-        body: JSON.stringify({ query, namespace:"public", retrieval_mode:mode, conversation_history:messages }),
+        body: JSON.stringify({
+          query,
+          namespace:"public",
+          retrieval_mode:mode,
+          conversation_history:messages,
+          response_language: language,
+        }),
       }).then((r) => r.json());
       setMessages((cur) => [...cur, {
         role:"assistant", content:response.answer,

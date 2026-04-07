@@ -10,6 +10,7 @@ from pathlib import Path
 
 import chromadb
 import httpx
+from chromadb.config import Settings as ChromaSettings
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse, StreamingResponse
@@ -63,7 +64,11 @@ app.add_middleware(
     allow_methods=["GET", "POST", "DELETE"],
     allow_headers=["Authorization", "Content-Type", "X-Namespace"],
 )
-chroma = chromadb.HttpClient(host=os.getenv("CHROMADB_HOST", "chromadb"), port=int(os.getenv("CHROMADB_PORT", "8000")))
+chroma = chromadb.HttpClient(
+    host=os.getenv("CHROMADB_HOST", "chromadb"),
+    port=int(os.getenv("CHROMADB_PORT", "8000")),
+    settings=ChromaSettings(anonymized_telemetry=False),
+)
 
 
 @app.on_event("startup")

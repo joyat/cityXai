@@ -6,6 +6,7 @@ import os
 from converters.csv_html import extract_csv, extract_html
 from converters.docx import extract_docx
 from converters.image import extract_image
+from converters.markdown import extract_markdown
 from converters.pdf import extract_pdf
 from converters.pptx import extract_pptx
 from converters.xlsx import extract_xlsx
@@ -17,6 +18,7 @@ ROUTES = {
     ".xlsx": extract_xlsx,
     ".pptx": extract_pptx,
     ".csv": extract_csv,
+    ".md": extract_markdown,
     ".html": extract_html,
     ".htm": extract_html,
     ".png": extract_image,

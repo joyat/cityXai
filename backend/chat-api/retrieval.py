@@ -1,13 +1,16 @@
 from __future__ import annotations
 
+import json
 import os
 import time
 from collections import defaultdict
 
 import chromadb
+from chromadb.config import Settings as ChromaSettings
 import httpx
 from rank_bm25 import BM25Okapi
 
+from text_utils import normalize_tokens, strip_metadata_lines, tokenize
 
 # BM25 index TTL — rebuild at most once per minute per namespace.
 # This prevents a full corpus scan on every single query.
@@ -21,6 +24,7 @@ class HybridRetriever:
         self.client = chromadb.HttpClient(
             host=os.getenv("CHROMADB_HOST", "chromadb"),
             port=int(os.getenv("CHROMADB_PORT", "8000")),
+            settings=ChromaSettings(anonymized_telemetry=False),
         )
         self.ollama_url = os.getenv("OLLAMA_URL", "http://ollama:11434")
         self.embed_model = os.getenv("EMBED_MODEL", "nomic-embed-text:v1.5")
@@ -49,7 +53,7 @@ class HybridRetriever:
         payload = collection.get(include=["documents", "metadatas"])
         corpus = payload.get("documents") or []
         metas = payload.get("metadatas") or []
-        tokenized = [doc.lower().split() for doc in corpus] if corpus else [["leer"]]
+        tokenized = [tokenize(strip_metadata_lines(doc)) for doc in corpus] if corpus else [["leer"]]
         index = BM25Okapi(tokenized)
         docs = [{"document": doc, "metadata": meta} for doc, meta in zip(corpus, metas)]
         self._bm25_cache[namespace] = (index, docs, time.monotonic())
@@ -75,7 +79,7 @@ class HybridRetriever:
 
     def sparse_search(self, query_text: str, namespace: str, k: int | None = None) -> list[dict]:
         index, docs = self._get_or_build_bm25(namespace)
-        scores = index.get_scores(query_text.lower().split())
+        scores = index.get_scores(tokenize(query_text))
         ranked = sorted(zip(scores, docs), key=lambda item: item[0], reverse=True)[: k or self.k]
         return [
             {"document": d["document"], "metadata": d["metadata"], "score": float(s), "source": "sparse"}
@@ -108,13 +112,19 @@ class HybridRetriever:
                 )
                 response.raise_for_status()
                 text = response.json()["response"]
-            lines = [line.strip('-* "') for line in text.splitlines() if line.strip()]
-            candidates = [query_text]
-            for line in lines:
-                if line not in candidates:
-                    candidates.append(line)
+            payload = json.loads(text)
+            if not isinstance(payload, list):
+                return [query_text]
+            candidates = []
+            for item in payload:
+                if isinstance(item, str):
+                    normalized = item.strip()
+                    if normalized and normalized not in candidates:
+                        candidates.append(normalized)
                 if len(candidates) == 3:
                     break
-            return candidates
+            if query_text not in candidates:
+                candidates.insert(0, query_text)
+            return candidates[:3] if candidates else [query_text]
         except Exception:
             return [query_text]
