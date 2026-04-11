@@ -26,7 +26,7 @@ const NAV = [
   { href: "/dashboard", de: "Dashboard", en: "Dashboard", icon: <GridIcon />, roles: [] },
   { href: "/documents", de: "Dokumente", en: "Documents", icon: <FolderIcon />, roles: ["document_admin", "system_admin"] },
   { href: "/chat", de: "Fachchat", en: "Expert Chat", icon: <ChatIcon />, roles: ["staff", "document_admin", "system_admin"] },
-  { href: "/audit", de: "Audit", en: "Audit", icon: <ShieldIcon />, roles: ["readonly_auditor", "system_admin"] },
+  { href: "/audit", de: "Audit", en: "Audit", icon: <ShieldIcon />, roles: ["staff", "document_admin", "readonly_auditor", "system_admin"] },
   { href: "/users", de: "Benutzer", en: "Users", icon: <UsersIcon />, roles: ["system_admin"] },
 ];
 

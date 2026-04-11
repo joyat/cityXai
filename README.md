@@ -22,6 +22,7 @@ Demo credentials:
 - `staff@demo.de` / `Demo1234!`
 - `auditor@demo.de` / `Demo1234!`
 - `admin@demo.de` / `Demo1234!`
+- `citizen@demo.de` / `Demo1234!`
 
 ## Demo walkthrough
 
@@ -38,7 +39,7 @@ Demo credentials:
 11. Open `https://localhost/grafana` and show the prebuilt dashboard.
 12. Log in as `auditor@demo.de` and show read-only audit access.
 13. Open `http://localhost/demo/` and show the citizen widget embedded on a municipal homepage.
-14. Copy a file into `./data/incoming/` and show it appear automatically after watcher ingestion.
+14. Copy a `.md`, `.txt`, `.csv`, or `.html` file into `./data/incoming/` and show it appear automatically after watcher ingestion.
 
 ## Hardware requirements
 
@@ -122,11 +123,11 @@ Demo credentials:
 
 ## Troubleshooting
 
-### `make up` fails during model pull
+### `make up` fails during model startup
 
-- Ollama model downloads can take a long time on first start.
+- The demo can use a local LM Studio-compatible server through the `ollama` bridge service.
 - Check logs with `make logs`.
-- If the configured model tags are unavailable on your machine, edit [.env](/Users/joyatsaha/.codex/worktrees/daf4/microservices-demo/.env) to smaller or newer Ollama model tags.
+- If the configured model tags are unavailable on your machine, edit `.env` to match models that are actually loaded locally.
 
 ### HTTPS certificate warning in the browser
 
@@ -145,7 +146,7 @@ Demo credentials:
 
 ### File watcher does not ingest
 
-- Place the file into [data/incoming](/Users/joyatsaha/.codex/worktrees/daf4/microservices-demo/data/incoming).
+- Place the file into `data/incoming/`.
 - Confirm `ingest-api` is healthy and has access to the mounted `/data` volume.
 
 ## Useful commands

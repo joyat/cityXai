@@ -19,7 +19,7 @@ async function tryKeycloak(email: string, password: string) {
 }
 
 async function tryDemoLogin(email: string, password: string, request: NextRequest) {
-  const response = await fetch(new URL("/api/dev-login", request.url), {
+  const response = await fetch("http://127.0.0.1:3000/api/dev-login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
@@ -42,8 +42,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Email and password are required." }, { status: 400 });
   }
 
-  let result = await tryKeycloak(email, password);
-  if (!result.ok) {
+  const demoLoginEnabled = process.env.DEMO_LOGIN_ENABLED === "true";
+  let result = demoLoginEnabled
+    ? await tryDemoLogin(email, password, request)
+    : await tryKeycloak(email, password);
+
+  if (!result.ok && !demoLoginEnabled) {
     result = await tryDemoLogin(email, password, request);
   }
 
