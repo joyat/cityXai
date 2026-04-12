@@ -1,6 +1,26 @@
 # cityXai
 
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](./LICENSE)
+[![Stack: Local-first](https://img.shields.io/badge/Stack-Local--first-0f766e.svg)](#architecture)
+[![UI: Next.js%2014](https://img.shields.io/badge/UI-Next.js%2014-111827.svg)](#services)
+[![APIs: FastAPI](https://img.shields.io/badge/APIs-FastAPI-0ea5e9.svg)](#services)
+
 cityXai is a locally hosted, GDPR-oriented municipal AI demo for German municipalities. The stack includes ingestion, hybrid RAG, role-based access control with Keycloak, a Next.js 14 admin portal, a citizen chat widget, audit logging, and observability with Prometheus and Grafana.
+
+## Highlights
+
+- Local-first municipal AI demo with document ingestion, hybrid retrieval, and source-grounded answers
+- Role-based workflows for document admins, staff, auditors, system admins, and citizens
+- Demo-ready observability with Prometheus and Grafana
+- LM Studio-compatible inference bridge for laptop demos without external dependencies
+- Citizen-facing chat widget and internal admin portal in one stack
+
+## Repository Guide
+
+- [Contributing](./.github/CONTRIBUTING.md)
+- [Code of Conduct](./.github/CODE_OF_CONDUCT.md)
+- [Security Policy](./.github/SECURITY.md)
+- [Pull Request Template](./.github/pull_request_template.md)
 
 ## Quick start
 
