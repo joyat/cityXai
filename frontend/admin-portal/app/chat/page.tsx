@@ -18,6 +18,10 @@ export default function ChatPage() {
     const query = String(form.get("query") || "").trim();
     if (!query || loading) return;
     setLoading(true);
+    const nextHistory = [...messages, { role:"user", content:query }].map((msg) => ({
+      role: String(msg.role ?? ""),
+      content: String(msg.content ?? ""),
+    }));
     setMessages((cur) => [...cur, { role:"user", content:query }]);
     event.currentTarget.reset();
     try {
@@ -28,7 +32,7 @@ export default function ChatPage() {
           query,
           namespace:"public",
           retrieval_mode:mode,
-          conversation_history:messages,
+          conversation_history:nextHistory,
           response_language: language,
         }),
       }).then((r) => r.json());

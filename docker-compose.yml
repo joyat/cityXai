@@ -148,11 +148,12 @@ services:
       context: .
       dockerfile: backend/ollama-lite/Dockerfile
     environment:
+      USE_LM_STUDIO: ${USE_LM_STUDIO:-true}
+      LM_STUDIO_BASE_URL: ${LM_STUDIO_BASE_URL:-http://host.docker.internal:1234/v1}
+      LM_STUDIO_TIMEOUT_SECONDS: ${LM_STUDIO_TIMEOUT_SECONDS:-180}
       OLLAMA_PRIMARY_MODEL: ${OLLAMA_PRIMARY_MODEL:-qwen3:8b-q4_K_M}
       OLLAMA_FALLBACK_MODEL: ${OLLAMA_FALLBACK_MODEL:-mistral:7b-q4_K_M}
       EMBED_MODEL: ${EMBED_MODEL:-nomic-embed-text:v1.5}
-    ports:
-      - "127.0.0.1:11434:11434"
     networks: [cityxai_net]
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:11434/health >/dev/null || exit 1"]

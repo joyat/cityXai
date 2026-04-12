@@ -1,3 +1,5 @@
+.env
+cityXai-brief.md
 secrets.txt
 # Runtime data
 data/audit/*.log

@@ -19,6 +19,7 @@ ROUTES = {
     ".pptx": extract_pptx,
     ".csv": extract_csv,
     ".md": extract_markdown,
+    ".txt": extract_markdown,
     ".html": extract_html,
     ".htm": extract_html,
     ".png": extract_image,
